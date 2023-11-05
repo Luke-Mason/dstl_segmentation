@@ -20,6 +20,9 @@ def to_df(date_path):
             event_paths += [os.path.join(date_path, metric, file_name) for file_name in
                         os.listdir(os.path.join(date_path, metric))]
 
+    if len(event_paths) == 0:
+        return None
+
     # Get the train and validation summaries toigether into a list of tuples
     summary_iterators = [EventAccumulator(event_path).Reload() for event_path in event_paths]
     data = []
@@ -44,7 +47,6 @@ def to_df(date_path):
 
     combined = None
     for df in data:
-
         if combined is None:
             combined = df
         else:
