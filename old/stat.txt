@@ -1,0 +1,16 @@
+Subset,Class,Count
+sky,kite,2352
+sky,airplane,3083
+sky,bird,3362
+vehicle,bicycle,3401
+vehicle,bus,4141
+vehicle,truck,6377
+street,fire hydrant,1797
+street,stop sign,1803
+street,traffic light,4430
+food,donut,1585
+food,pizza,3319
+food,cake,3049
+wildlife,zebra,2001
+wildlife,elephant,2232
+wildlife,giraffe,2647

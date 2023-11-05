@@ -1,0 +1,2 @@
+Subset,Resolution,Pixel_Accuracy,Mean_IoU,Class_0_IoU,Class_1_IoU
+apple,128,0.984771740752095,0.9161233,0.98334724,0.8488993

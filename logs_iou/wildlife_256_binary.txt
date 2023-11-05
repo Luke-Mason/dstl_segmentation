@@ -1,0 +1,46 @@
+EVAL (5) | Loss: 0.213, PixelAcc: 0.91, Mean IoU: 0.76 |
+"{'Pixel_Accuracy': 0.912, 'Mean_IoU': 0.762, 'Class_IoU': {0: 0.896, 1: 0.628}}"
+EVAL (10) | Loss: 0.223, PixelAcc: 0.91, Mean IoU: 0.77 |
+"{'Pixel_Accuracy': 0.908, 'Mean_IoU': 0.768, 'Class_IoU': {0: 0.89, 1: 0.646}}"
+EVAL (15) | Loss: 0.244, PixelAcc: 0.90, Mean IoU: 0.76 |
+"{'Pixel_Accuracy': 0.904, 'Mean_IoU': 0.763, 'Class_IoU': {0: 0.884, 1: 0.642}}"
+EVAL (20) | Loss: 0.214, PixelAcc: 0.92, Mean IoU: 0.79 |
+"{'Pixel_Accuracy': 0.924, 'Mean_IoU': 0.794, 'Class_IoU': {0: 0.909, 1: 0.678}}"
+EVAL (25) | Loss: 0.209, PixelAcc: 0.93, Mean IoU: 0.80 |
+"{'Pixel_Accuracy': 0.927, 'Mean_IoU': 0.799, 'Class_IoU': {0: 0.913, 1: 0.686}}"
+EVAL (30) | Loss: 0.249, PixelAcc: 0.92, Mean IoU: 0.78 |
+"{'Pixel_Accuracy': 0.919, 'Mean_IoU': 0.782, 'Class_IoU': {0: 0.903, 1: 0.661}}"
+EVAL (35) | Loss: 0.226, PixelAcc: 0.93, Mean IoU: 0.80 |
+"{'Pixel_Accuracy': 0.927, 'Mean_IoU': 0.802, 'Class_IoU': {0: 0.913, 1: 0.691}}"
+EVAL (40) | Loss: 0.229, PixelAcc: 0.92, Mean IoU: 0.80 |
+"{'Pixel_Accuracy': 0.922, 'Mean_IoU': 0.797, 'Class_IoU': {0: 0.906, 1: 0.688}}"
+EVAL (45) | Loss: 0.238, PixelAcc: 0.93, Mean IoU: 0.80 |
+"{'Pixel_Accuracy': 0.925, 'Mean_IoU': 0.801, 'Class_IoU': {0: 0.91, 1: 0.692}}"
+EVAL (50) | Loss: 0.230, PixelAcc: 0.92, Mean IoU: 0.80 |
+"{'Pixel_Accuracy': 0.924, 'Mean_IoU': 0.801, 'Class_IoU': {0: 0.909, 1: 0.694}}"
+EVAL (55) | Loss: 0.238, PixelAcc: 0.93, Mean IoU: 0.80 |
+"{'Pixel_Accuracy': 0.928, 'Mean_IoU': 0.803, 'Class_IoU': {0: 0.915, 1: 0.691}}"
+EVAL (60) | Loss: 0.245, PixelAcc: 0.93, Mean IoU: 0.81 |
+"{'Pixel_Accuracy': 0.931, 'Mean_IoU': 0.809, 'Class_IoU': {0: 0.917, 1: 0.7}}"
+EVAL (65) | Loss: 0.258, PixelAcc: 0.93, Mean IoU: 0.81 |
+"{'Pixel_Accuracy': 0.93, 'Mean_IoU': 0.809, 'Class_IoU': {0: 0.917, 1: 0.702}}"
+EVAL (70) | Loss: 0.283, PixelAcc: 0.93, Mean IoU: 0.79 |
+"{'Pixel_Accuracy': 0.927, 'Mean_IoU': 0.793, 'Class_IoU': {0: 0.915, 1: 0.67}}"
+EVAL (75) | Loss: 0.257, PixelAcc: 0.93, Mean IoU: 0.80 |
+"{'Pixel_Accuracy': 0.927, 'Mean_IoU': 0.8, 'Class_IoU': {0: 0.913, 1: 0.686}}"
+EVAL (80) | Loss: 0.376, PixelAcc: 0.92, Mean IoU: 0.76 |
+"{'Pixel_Accuracy': 0.919, 'Mean_IoU': 0.765, 'Class_IoU': {0: 0.906, 1: 0.624}}"
+EVAL (85) | Loss: 0.340, PixelAcc: 0.92, Mean IoU: 0.78 |
+"{'Pixel_Accuracy': 0.921, 'Mean_IoU': 0.777, 'Class_IoU': {0: 0.908, 1: 0.645}}"
+EVAL (90) | Loss: 0.329, PixelAcc: 0.93, Mean IoU: 0.78 |
+"{'Pixel_Accuracy': 0.925, 'Mean_IoU': 0.784, 'Class_IoU': {0: 0.912, 1: 0.656}}"
+EVAL (95) | Loss: 0.355, PixelAcc: 0.92, Mean IoU: 0.78 |
+"{'Pixel_Accuracy': 0.923, 'Mean_IoU': 0.78, 'Class_IoU': {0: 0.911, 1: 0.649}}"
+EVAL (100) | Loss: 0.311, PixelAcc: 0.92, Mean IoU: 0.79 |
+"{'Pixel_Accuracy': 0.924, 'Mean_IoU': 0.786, 'Class_IoU': {0: 0.911, 1: 0.66}}"
+EVAL (105) | Loss: 0.340, PixelAcc: 0.92, Mean IoU: 0.78 |
+"{'Pixel_Accuracy': 0.923, 'Mean_IoU': 0.783, 'Class_IoU': {0: 0.91, 1: 0.655}}"
+EVAL (110) | Loss: 0.277, PixelAcc: 0.93, Mean IoU: 0.80 |
+"{'Pixel_Accuracy': 0.928, 'Mean_IoU': 0.798, 'Class_IoU': {0: 0.914, 1: 0.682}}"
+EVAL (115) | Loss: 0.260, PixelAcc: 0.93, Mean IoU: 0.80 |
+"{'Pixel_Accuracy': 0.929, 'Mean_IoU': 0.804, 'Class_IoU': {0: 0.916, 1: 0.691}}"

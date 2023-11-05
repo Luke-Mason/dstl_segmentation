@@ -1,0 +1,2 @@
+Subset,Resolution,Pixel_Accuracy,Mean_IoU,Class_0_IoU,Class_1_IoU
+dog,128,0.9803726172058053,0.91813385,0.9777184,0.85854936

@@ -1,0 +1,82 @@
+{
+    "name": "UFONet_voc_512_batch16",
+    "n_gpu": 1,
+    "use_synch_bn": false,
+
+    "arch": {
+        "type": "UFONet",
+        "args": {
+            "backbone": "resnet50",
+            "freeze_bn": false,
+            "freeze_backbone": false
+        }
+    },
+
+    "train_loader": {
+        "type": "VOC",
+        "args":{
+            "data_dir": "/home/kaien125/experiments/data/PascalVOC2012",
+            "batch_size": 16,
+            "base_size": 512,
+            "crop_size": 512,
+            "augment": true,
+            "shuffle": true,
+            "scale": true,
+            "flip": true,
+            "rotate": true,
+            "blur": false,
+            "split": "train",
+            "num_workers": 8
+        }
+    },
+
+    "val_loader": {
+        "type": "VOC",
+        "args":{
+            "data_dir": "/home/kaien125/experiments/data/PascalVOC2012",
+            "batch_size": 16,
+            "crop_size": 512,
+            "val": true,
+            "split": "val",
+            "num_workers": 4
+        }
+    },
+
+    "optimizer": {
+        "type": "SGD",
+        "differential_lr": true,
+        "args":{
+            "lr": 0.0005,
+            "weight_decay": 1e-4,
+            "momentum": 0.9
+        }
+    },
+
+    "loss": "CrossEntropyLoss2d",
+    "ignore_index": 255,
+    "lr_scheduler": {
+        "type": "StepLR",
+        "args": {
+            "gamma": 0.5,
+            "step_size": 3,
+            "stop_epoch": 12
+        }
+    },
+
+    "trainer": {
+        "epochs": 500,
+        "save_dir": "saved/",
+        "save_period": 10,
+  
+        "monitor": "max Mean_IoU",
+        "monitor": "max Mean_IoU",
+        "early_stop": 10,
+        
+        "tensorboard": true,
+        "log_dir": "saved/runs",
+        "log_per_iter": 20,
+
+        "val": true,
+        "val_per_epochs": 5
+    }
+}

@@ -1,0 +1,91 @@
+{
+    "name": "dstl_ex20-2",
+     "n_gpu": 1,
+    "use_synch_bn": false,
+    "arch": {
+        "type": "UFONet",
+        "args": {
+            "backbone": "resnet50",
+            "freeze_bn": false,
+            "freeze_backbone": false
+        }
+    },
+    "trainer": {
+        "epochs": 100,
+        "save_dir": "saved/",
+        "save_period": 20,
+        "monitor": "max Mean_IoU",
+        "early_stop": 3,
+        "tensorboard": true,
+        "log_dir": "saved/runs",
+        "log_per_iter": 10,
+        "val": true,
+        "val_per_epochs": 2,
+        "k_stop": 1,
+        "k_split": 5,
+        "k_shuffle": false,
+        "k_random_state": 42
+    },
+    "all_loader": {
+        "preprocessing": {
+            "patch_size": 256,
+            "align_images": false,
+            "img_ref_scale": "RGB",
+            "overlap_pixels": 56,
+            "interpolation_method": 4,
+            "training_band_groups": [{
+                "bands": [1,2,17,18,19,20],
+                "strategy": "min"
+            }, {
+                "bands": [3,5,6,7,8,9],
+                "strategy": "min"
+            }, {
+                "bands": [4,13,14,15,16,10,11,12],
+                "strategy": "min"
+            }]
+        },
+        "args": {
+            "add_negative_class": true,
+            "batch_size": 128,
+            "return_id": false,
+            "num_workers": 8
+        }
+    },
+    "train_loader": {
+        "args": {
+            "augment": true,
+            "shuffle": true,
+            "flip": true,
+            "rotate": true,
+            "blur": false
+        }
+    },
+    "val_loader":  {
+        "args": {
+            "augment": false,
+            "shuffle": false,
+            "flip": false,
+            "rotate": false,
+            "blur": false
+        }
+    },
+    "optimizer": {
+        "type": "Adam",
+        "differential_lr": true,
+        "args": {
+            "lr": 0.1,
+            "weight_decay": 1e-3
+        }
+    },
+    "loss": "JaccardCoefficient",
+    "threshold": 0.5,
+    "ignore_index": 10,
+    "lr_scheduler": {
+        "type": "StepLR",
+        "args": {
+            "gamma": 0.5,
+            "step_size": 3,
+            "stop_epoch": 12
+        }
+    }
+}

@@ -1,0 +1,6 @@
+model,input,Total_params,GFlops
+ssd-vgg,300,26285486,31.44
+retinanet,512,37968692,78
+yolov4-tiny,416,5961014,1.7
+yolo3-darknet,416,61949149,33
+fast-rcnn-resnet50,800,28469983,52.44

@@ -1,0 +1,2 @@
+Subset,Resolution,Pixel_Accuracy,Mean_IoU,Class_0_IoU,Class_1_IoU
+cat,128,0.9766140669117621,0.92083585,0.97230345,0.86936826

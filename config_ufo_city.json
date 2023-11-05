@@ -1,0 +1,81 @@
+{
+    "name": "LEDNet_city_512_batch8_cat",
+    "n_gpu": 1,
+    "use_synch_bn": false,
+
+    "arch": {
+        "type": "LEDNet",
+        "args": {
+            "backbone": "resnet34",
+            "freeze_bn": false,
+            "freeze_backbone": false
+        }
+    },
+
+    "train_loader": {
+        "type": "CityScapes",
+        "args":{
+            "data_dir": "/home/kaien125/experiments/data",
+            "batch_size": 8,
+            "base_size": 512,
+            "crop_size": 512,
+            "augment": true,
+            "shuffle": true,
+            "scale": true,
+            "flip": true,
+            "rotate": true,
+            "blur": false,
+            "split": "train",
+            "num_workers": 8
+        }
+    },
+
+    "val_loader": {
+        "type": "CityScapes",
+        "args":{
+            "data_dir": "/home/kaien125/experiments/data",
+            "batch_size": 8,
+            "crop_size": 512,
+            "val": true,
+            "split": "val",
+            "num_workers": 4
+        }
+    },
+
+    "optimizer": {
+        "type": "SGD",
+        "differential_lr": true,
+        "args":{
+            "lr": 0.001,
+            "weight_decay": 1e-4,
+            "momentum": 0.9
+        }
+    },
+
+    "loss": "CrossEntropyLoss2d",
+    "ignore_index": 255,
+    "lr_scheduler": {
+        "type": "StepLR",
+        "args": {
+            "gamma": 0.5,
+            "step_size": 3,
+            "stop_epoch": 12
+        }
+    },
+
+    "trainer": {
+        "epochs": 800,
+        "save_dir": "saved/",
+        "save_period": 10,
+  
+        "monitor": "max Mean_IoU",
+        "early_stop": 10,
+        
+        "tensorboard": true,
+        "log_dir": "saved/runs",
+        "log_per_iter": 20,
+
+        "val": true,
+        "val_per_epochs": 5
+    }
+}

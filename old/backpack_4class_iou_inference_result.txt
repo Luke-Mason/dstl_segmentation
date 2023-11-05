@@ -1,0 +1,2 @@
+Subset,Resolution,Pixel_Accuracy,Mean_IoU,Class_0_IoU,Class_1_IoU
+backpack,128,0.9963962120714897,0.9081645,0.9963366,0.8199924

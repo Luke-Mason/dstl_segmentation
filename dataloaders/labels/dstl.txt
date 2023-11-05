@@ -1,0 +1,12 @@
+Id Name
+0 Buildings # large building, residential, non-residential, fuel storagefacility, fortified building
+1 Misc # Manmade structures
+2 Road
+3 Track # poor/dirt/cart track, footpath/trail
+4 Trees # woodland, hedgerows, groups of trees, standalone trees
+5 Crops # contour ploughing/cropland, grain (wheat) crops, row (potatoes,turnips) crops
+6 Waterway
+7 Standing water
+8 Vehicle Large large vehicle # (e.g. lorry, truck, bus), logistics vehicle
+9 Vehicle Small small vehicle # (car, van), motorbike
+10 Nothing # none of the above classes, is normally 0 but isn't :(

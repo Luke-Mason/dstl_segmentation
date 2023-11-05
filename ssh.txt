@@ -1,0 +1,6 @@
+ssh ec2-user@s3815738.jump.cosc2637.route53.aws.rmit.edu.au -i s3815738-cosc2637.pem
+sh create_cluster.sh
+ssh hadoop@s3815738.emr.cosc2637.route53.aws.rmit.edu.au -i s3815738-cosc2637.pem
+scp -i s3815738-cosc2637.pem s3815738-cosc2637.pem ec2-user@s3815738.jump.cosc2637.route53.aws.rmit.edu.au:/home/ec2-user/
+ssh-keygen -R s3815738.emr.cosc2637.route53.aws.rmit.edu.au
+sh terminate_cluster.sh
