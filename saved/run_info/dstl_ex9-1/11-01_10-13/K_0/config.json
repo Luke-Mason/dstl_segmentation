@@ -1,0 +1,101 @@
+{
+    "all_loader": {
+        "args": {
+            "add_negative_class": true,
+            "batch_size": 128,
+            "num_workers": 8,
+            "return_id": false
+        },
+        "preprocessing": {
+            "align_images": false,
+            "img_ref_scale": "M",
+            "interpolation_method": 4,
+            "overlap_pixels": 56,
+            "patch_size": 256,
+            "training_band_groups": [
+                {
+                    "bands": [
+                        9
+                    ]
+                },
+                {
+                    "bands": [
+                        10
+                    ]
+                },
+                {
+                    "bands": [
+                        11
+                    ]
+                }
+            ],
+            "training_classes": [
+                0
+            ]
+        }
+    },
+    "arch": {
+        "args": {
+            "backbone": "resnet50",
+            "freeze_backbone": false,
+            "freeze_bn": false
+        },
+        "type": "UFONet"
+    },
+    "ignore_index": 10,
+    "loss": "JaccardCoefficient",
+    "lr_scheduler": {
+        "args": {
+            "gamma": 0.5,
+            "step_size": 3,
+            "stop_epoch": 12
+        },
+        "type": "StepLR"
+    },
+    "n_gpu": 1,
+    "name": "dstl_ex9-1",
+    "optimizer": {
+        "args": {
+            "lr": 0.1,
+            "weight_decay": 0.001
+        },
+        "differential_lr": true,
+        "type": "Adam"
+    },
+    "threshold": 0.5,
+    "train_loader": {
+        "args": {
+            "augment": true,
+            "blur": false,
+            "flip": true,
+            "rotate": true,
+            "shuffle": true
+        }
+    },
+    "trainer": {
+        "early_stop": 3,
+        "epochs": 100,
+        "k_random_state": 42,
+        "k_shuffle": false,
+        "k_split": 5,
+        "k_stop": 1,
+        "log_dir": "saved/runs",
+        "log_per_iter": 10,
+        "monitor": "max Mean_IoU",
+        "save_dir": "saved/",
+        "save_period": 20,
+        "tensorboard": true,
+        "val": true,
+        "val_per_epochs": 2
+    },
+    "use_synch_bn": false,
+    "val_loader": {
+        "args": {
+            "augment": false,
+            "blur": false,
+            "flip": false,
+            "rotate": false,
+            "shuffle": false
+        }
+    }
+}

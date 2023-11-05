@@ -1,0 +1,84 @@
+{
+    "arch": {
+        "args": {
+            "backbone": "resnet50",
+            "freeze_backbone": false,
+            "freeze_bn": false
+        },
+        "type": "UFONet"
+    },
+    "ignore_index": 10,
+    "loss": "JaccardCoefficient",
+    "lr_scheduler": {
+        "args": {},
+        "type": "Poly"
+    },
+    "n_gpu": 1,
+    "name": "dstl_ex2",
+    "optimizer": {
+        "args": {
+            "lr": 0.01,
+            "weight_decay": 0.001
+        },
+        "differential_lr": true,
+        "type": "Adam"
+    },
+    "threshold": 0.5,
+    "train_loader": {
+        "args": {
+            "add_negative_class": false,
+            "augment": false,
+            "auto_balance_classes": true,
+            "batch_size": 128,
+            "blur": true,
+            "flip": true,
+            "num_workers": 8,
+            "rotate": true,
+            "shuffle": true
+        },
+        "preprocessing": {
+            "align_images": false,
+            "img_ref_scale": "RGB",
+            "interpolation_method": 4,
+            "overlap_pixels": 56,
+            "patch_size": 256,
+            "training_band_groups": [
+                {
+                    "bands": [
+                        2
+                    ]
+                },
+                {
+                    "bands": [
+                        3
+                    ]
+                },
+                {
+                    "bands": [
+                        4
+                    ]
+                }
+            ],
+            "training_classes": [
+                0
+            ]
+        }
+    },
+    "trainer": {
+        "early_stop": 10000,
+        "epochs": 100,
+        "k_random_state": 42,
+        "k_shuffle": false,
+        "k_split": 5,
+        "k_stop": 1,
+        "log_dir": "saved/runs",
+        "log_per_iter": 10,
+        "monitor": "max Mean_IoU",
+        "save_dir": "saved/",
+        "save_period": 20,
+        "tensorboard": true,
+        "val": true,
+        "val_per_epochs": 5
+    },
+    "use_synch_bn": false
+}
