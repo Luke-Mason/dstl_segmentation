@@ -61,13 +61,8 @@ def tbToCsv(mainPath: str):
     data = []
     for i in tqdm(range(0,len(allPaths),1)):
         fileName = allPaths[i]
-        try:
-            df = to_df(fileName)
-            data.append(df)
-        except Exception as e:
-            print("Error with file:",fileName)
-            print(str(e))
-            break
+        df = to_df(fileName)
+        data.append(df)
 
     combined = None
     for df in data:

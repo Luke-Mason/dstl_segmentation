@@ -283,7 +283,7 @@ class DSTLPreprocessor:
                 scale_value = (100 / ratios[i]) / (num_classes - 1)
                 p += pixel_ratio * scale_value
             classes_ = p * ((100 / num_classes) / 100)
-            ps.append(np.round(classes_ / 100, 3))
+            ps.append(np.round(classes_ / 100, 6))
         return ps
 
 
