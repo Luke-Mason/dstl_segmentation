@@ -21,6 +21,8 @@ obj_colors = {
 
 ids = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
        'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', "x", "y", "z"]
+window = 10  # Adjust the window size for smoothing
+
 
 def visualise_run_stats(id, run_path: str, run_desc: str, dir: str):
     metric = "Mean_IoU"
@@ -29,7 +31,6 @@ def visualise_run_stats(id, run_path: str, run_desc: str, dir: str):
     df = df.set_index("Epochs")
     # Loop over each object
     objects = metric_indx.values()
-    labels = ["Train", "Val", "Negative Train", "Negative Val"]
     # Remove "Negative" element
     objects = [item for item in objects if item != "Negative" and item != "All"]
     for i, object_name in enumerate(objects):
@@ -46,17 +47,14 @@ def visualise_run_stats(id, run_path: str, run_desc: str, dir: str):
         if len(cols) == 0:
             continue
 
-        # cols += df.filter(regex=f"step.*").columns
-
+        #%%
         # Get the columns for the object
         sns.set(style="whitegrid")
 
-        # Create a new figure
-        plt.figure(figsize=(8, 8))
+        labels = [f"{object_name} Train", f"{object_name} Val", "Negative Train", "Negative Val"]
 
         # Specify the DataFrame, columns, and title for the Seaborn plot
         for j, col in enumerate(cols):
-            window = 50  # Adjust the window size for smoothing
             df[col] = df[col].rolling(window=window, min_periods=1).mean()
             linestyle = 'solid' if j % 2 == 0 else 'dashed'
             custom_palette = [color for color in [obj_colors[object_name], obj_colors["Negative"]]
@@ -64,32 +62,37 @@ def visualise_run_stats(id, run_path: str, run_desc: str, dir: str):
             sns.set_palette(custom_palette)
             sns.lineplot(data=df, x="Epochs", y=col, label=labels[j], linestyle=linestyle)
 
-        plt.title(f"{ids[id]}-{i + 1}. {object_name} - {metric} - {run_desc}", fontsize=18)
-        plt.xlabel("Epochs", fontsize=16)
-        plt.ylabel(metric, fontsize=16)
-
+        # plt.title(f"{ids[id]}-{i + 1}. {object_name} - {metric} - {run_desc}", fontsize=24)
+        plt.xlabel("Epochs", fontsize=24)
+        plt.ylabel(metric, fontsize=24)
+        plt.xticks(fontsize=20)
+        plt.yticks(fontsize=20)
+        plt.legend(fontsize=14)
+        plt.tight_layout()
         plt.savefig(f'{dir}/{ids[id]}-{i + 1}.png')
+        plt.close()
 
+        #%%
 
     # Do the same for the loss of all objects not for each
     all_cols = df.filter(regex=f".*Lr.*").columns.tolist()
     sns.set(style="whitegrid")
-    custom_palette = [item for item in obj_colors.values() for _ in range(2)]
+    custom_palette = list(obj_colors.values())
     sns.set_palette(custom_palette)
-
-    # Create a new figure
-    plt.figure(figsize=(8, 8))
 
     # Specify the DataFrame, columns, and title for the Seaborn plot
     for j, col in enumerate(all_cols):
-        window = 50  # Adjust the window size for smoothing
         df[col] = df[col].rolling(window=window, min_periods=1).mean()
         sns.lineplot(data=df, x="Epochs", y=col, label=objects[j])
-    plt.title(f"{ids[id]}-{len(objects) + 1}. Learning Rates - {run_desc} ", fontsize=18)
-    plt.xlabel("Epochs", fontsize=16)
-    plt.ylabel("Learning Rate", fontsize=16)
+    # plt.title(f"{ids[id]}-{len(objects) + 1}. Learning Rates - {run_desc} ", fontsize=18)
+    plt.xlabel("Epochs", fontsize=24)
+    plt.ylabel("Learning Rate", fontsize=24)
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
+    plt.legend(fontsize=14)
+    plt.tight_layout()
     plt.savefig(f'{dir}/{ids[id]}-{len(objects) + 1}.png')
-
+    plt.close()
 
     all_cols = []
     labels= []
@@ -112,23 +115,22 @@ def visualise_run_stats(id, run_path: str, run_desc: str, dir: str):
 
         labels += [f"{object_name} Train", f"{object_name} Val"]
 
-
-    # Create a new figure
-    plt.figure(figsize=(8, 8))
-
     # Specify the DataFrame, columns, and title for the Seaborn plot
     for j, col in enumerate(all_cols):
-        window = 50  # Adjust the window size for smoothing
         df[col] = df[col].rolling(window=window, min_periods=1).mean()
         linestyle = 'solid' if j % 2 == 0 else 'dashed'
         ax = sns.lineplot(data=df, x="Epochs", y=col, label=labels[j],
                           linestyle=linestyle)
         ax.set_ylim(-4, 4)
-    plt.title(f"{ids[id]}-{len(objects) + 2}. Losses - {run_desc} ", fontsize=18)
-    plt.xlabel("Epochs", fontsize=16)
-    plt.ylabel("Loss", fontsize=16)
+    # plt.title(f"{ids[id]}-{len(objects) + 2}. Losses - {run_desc} ", fontsize=18)
+    plt.xlabel("Epochs", fontsize=24)
+    plt.ylabel("Loss", fontsize=24)
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
+    plt.legend(fontsize=10)
+    plt.tight_layout()
     plt.savefig(f'{dir}/{ids[id]}-{len(objects) + 2}.png')
-
+    plt.close()
 
 if __name__ == '__main__':
     dir = "ex_set_1"
