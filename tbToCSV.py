@@ -6,11 +6,22 @@ from tensorboard.backend.event_processing.event_accumulator import EventAccumula
 import glob
 from tqdm import tqdm
 import sys
+import re
 
-def to_df(dpath):
+def to_df(date_path):
+
+    # check if the path is a directory
+    if not os.path.isdir(date_path):
+        return None
+
+    event_paths = []
+    for metric in os.listdir(date_path):
+        if os.path.isdir(os.path.join(date_path, metric)):
+            event_paths += [os.path.join(date_path, metric, file_name) for file_name in
+                        os.listdir(os.path.join(date_path, metric))]
+
     # Get the train and validation summaries toigether into a list of tuples
-
-    summary_iterators = [EventAccumulator(os.path.join(dpath, dname,subdir)).Reload() for dname in os.listdir(dpath) for subdir in os.listdir(os.path.join(dpath, dname))]
+    summary_iterators = [EventAccumulator(event_path).Reload() for event_path in event_paths]
     data = []
     for summary in summary_iterators:
         # Check path for if it is a val or train
@@ -18,6 +29,8 @@ def to_df(dpath):
         tags = summary.Tags()['scalars']
         # Get the name of the column
         tail, head = os.path.split(summary.path)
+        tail, head = os.path.split(tail)
+
         frame = {
             "step": [],
             head: []
@@ -31,6 +44,7 @@ def to_df(dpath):
 
     combined = None
     for df in data:
+
         if combined is None:
             combined = df
         else:
@@ -52,27 +66,27 @@ def to_df(dpath):
 
     combined = pd.concat([loss_df, combined, negatives_df], axis=1)
 
+    combined.columns = [col.replace(" ", "_") for col in combined.columns]
     return combined
 
 def tbToCsv(mainPath: str):
-    allPaths = list(glob.iglob(mainPath+'/**/**/**/*', recursive=True))
+    allPaths = list(glob.iglob(mainPath+'/*/*', recursive=True))
     print("Converting TB Events to CSV:")
 
     data = []
     for i in tqdm(range(0,len(allPaths),1)):
         fileName = allPaths[i]
         df = to_df(fileName)
-        data.append(df)
+        if df is not None:
+            data.append(df)
 
-    combined = None
-    for df in data:
-        if combined is None:
-            combined = df
-        else:
-            combined = pd.merge(combined, df, on='step', how='outer')
+    combined = pd.concat(data, axis=1)
 
-    if combined is not None:
-        combined.to_csv(f"{mainPath}.tsv", index=False, sep='\t')
+    # Remove steps column and add it back as an index of row num
+    combined = combined.filter(regex='^(?!step$)')
+    combined['step'] = range(len(combined))
+    combined = combined.set_index('step')
+    combined.to_csv(f"{mainPath}.tsv", index=True, sep='\t')
 
 if __name__ == '__main__':
     run_name = sys.argv[1]
