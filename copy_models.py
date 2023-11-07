@@ -16,7 +16,6 @@ def main():
             continue
         class_runs = os.listdir('saved/runs/' + exp_dir)
         for class_run_dir in class_runs:
-            attempts = os.listdir('saved/runs/' + exp_dir + '/' + class_run_dir)
             # Get the i index from class_run_dir from the name part
             # training_classes(x)
             pattern = r'training_classes_\((\d+)\)'
@@ -31,6 +30,11 @@ def main():
             else:
                 raise ValueError(f'No match found for {pattern} in {class_run_dir}')
 
+            attempts = os.listdir('saved/runs/' + exp_dir + '/' + class_run_dir)
+            if len(attempts) != 1:
+                continue
+                print(f'Expected 1 attempt in {class_run_dir}, found {len(
+                attempts)}')
             dir_name = attempts[0]
 
             # Get the experiement number from run name
