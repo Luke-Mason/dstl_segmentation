@@ -30,6 +30,7 @@ class BaseTrainer:
         self.loss = loss
         self.config = config
         self.train_loader = train_loader
+
         self.val_loader = val_loader
         self.train_logger = train_logger
         self._setup_logging()
@@ -144,6 +145,10 @@ class BaseTrainer:
         return device, available_gpus
     
     def train(self):
+        if self.val_loader is None:
+            self._run_model()
+        return
+
         stats = dict()
 
         for epoch in range(self.start_epoch, self.epochs+1):
@@ -161,7 +166,9 @@ class BaseTrainer:
                         })
                     stats[class_name][metric_name]['train'].append(total)
             metrics = {}
-            if (self.do_validation and epoch % self.config['trainer']['val_per_epochs'] == 0):
+            if (self.val_loader is not None and self.do_validation and epoch %
+                    self.config['trainer'][
+                'val_per_epochs'] == 0):
                 epoch_stats = self._valid_epoch(epoch)
                 for class_name, metric_totals in epoch_stats.items():
                     if class_name not in stats:
@@ -258,6 +265,9 @@ class BaseTrainer:
         self.optimizer.load_state_dict(checkpoint['optimizer'])
 
         self.logger.info(f'Checkpoint <{resume_path}> (epoch {self.start_epoch}) was loaded')
+
+    def _run_model(self):
+        raise NotImplementedError
 
     def _train_epoch(self, epoch):
         raise NotImplementedError

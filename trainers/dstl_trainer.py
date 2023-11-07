@@ -115,6 +115,157 @@ class DSTLTrainer(BaseTrainer):
 
         return adjusted_array
 
+    def _run_model(self):
+        self.model.eval()
+        self.wrt_mode = 'val'
+
+        loss_history = np.array([])
+        total_metric_totals = dict()
+
+        tbar = tqdm(self.val_loader, ncols=130)
+        with torch.no_grad():
+            for batch_idx, (data, target) in enumerate(tbar):
+                # LOSS
+                output = self.model(data)
+                target = target.to(self.device)
+
+                loss = self.loss(output, target)
+                if isinstance(self.loss, torch.nn.DataParallel):
+                    loss = loss.mean()
+
+                if batch_idx % self.log_step == 0:
+                    loss_history = np.append(loss_history, loss.item())
+
+                # METRICS
+                metrics_totals = eval_metrics(output, target, self.threshold)
+                if 'all' not in total_metric_totals:
+                    total_metric_totals['all'] = metrics_totals
+                else:
+                    for k, v in metrics_totals.items():
+                        total_metric_totals['all'][k] += v
+
+                for class_idx in range(self.num_classes):
+                    class_metrics_totals = eval_metrics(
+                        output[:, class_idx, :, :][:, np.newaxis, :, :],
+                        target[:, class_idx, :, :][:, np.newaxis, :, :],
+                        self.threshold)
+                    # Convert class_indx into class_name_indx
+                    extra_negative_class = 1 if self.add_negative_class == True else 0
+                    class_name_idx = self.training_classes[
+                        class_idx] if class_idx < len(
+                        self.training_classes) else 9 + extra_negative_class
+                    if str(class_name_idx) not in total_metric_totals:
+                        # Convert class_indx into class_name_indx
+
+                        total_metric_totals[
+                            str(class_name_idx)] = class_metrics_totals
+                    else:
+                        for k, v in class_metrics_totals.items():
+                            total_metric_totals[str(class_name_idx)][k] += v
+
+                # PRINT INFO
+                seg_metrics = self._get_metrics(metrics_totals)
+                description = f'EVAL EPOCH {epoch} | Batch: {batch_idx + 1} | '
+                for k, v in seg_metrics.items():
+                    description += f'{self.convert_to_title_case(k)}: {v:.3f} | '
+                tbar.set_description(description)
+
+                # WRTING & VISUALIZING THE MASKS
+                # LIST OF IMAGE TO VIZ (15 images)
+                if batch_idx % 20 == 0 and self.k_fold == 0:
+                    for k in range(1):
+                        dta, tgt, out = data[k], target[k], output[k]
+
+                        dta = dta * 2047
+                        dta = torch.tensor(dta).to(self.device)
+                        _dta = self.vis_transform(dta.to(torch.uint8))
+                        dta = torch.unsqueeze(_dta, dim=0)
+                        for i in range(self.num_classes):
+                            tgi = tgt[i, :, :][np.newaxis, :, :]
+                            tgi = (tgi > self.threshold).float().to(
+                                torch.int) * 255
+                            tgi = self.restore_transform(tgi.to(torch.uint8))
+
+                            outi = out[i, :, :][np.newaxis, :, :]
+                            outi = (outi > self.threshold).float().to(
+                                torch.int) * 255
+                            outi = self.restore_transform(outi.to(torch.uint8))
+
+                            # %%
+                            # plt.figure(figsize=(20, 7))
+                            # plt.subplot(2, 4, 1)
+                            # plt.title('Input (Image)')
+                            # plt.imshow(torch.from_numpy(self.dra(
+                            #     _dta.numpy())).permute(1, 2, 0))
+                            # plt.axis('off')
+                            #
+                            # plt.subplot(2, 4, 2)
+                            # plt.title('Input (Image)')
+                            # plt.imshow(torch.from_numpy(self.dra2(
+                            #     _dta.numpy())).permute(1, 2, 0))
+                            # plt.axis('off')
+                            #
+                            # plt.subplot(2, 4, 3)
+                            # plt.title('Input (Image)')
+                            # plt.imshow(self.dra3(_dta).permute(1, 2, 0))
+                            # plt.axis('off')
+                            #
+                            # plt.subplot(2, 4, 4)
+                            # plt.title('Input (Image)')
+                            # plt.imshow(_dta.permute(1, 2, 0)[:, :, [1,2,0]])
+                            # plt.axis('off')
+                            #
+                            # plt.subplot(2, 4, 5)
+                            # plt.title('Input (Image)')
+                            # plt.imshow(_dta.permute(1, 2, 0)[:, :, [2,0,1]])
+                            # plt.axis('off')
+                            #
+                            # plt.subplot(2, 4, 6)
+                            # plt.title('Input (Image)')
+                            # plt.imshow(_dta.permute(1, 2, 0)[:, :, [2,1,0]])
+                            # plt.axis('off')
+                            #
+                            # plt.subplot(2, 4, 7)
+                            # plt.title('Output (Predicted)')
+                            # plt.imshow(outi.permute(1,2,0), cmap='gray')
+                            # plt.axis('off')
+                            #
+                            # # Plotting the target tensor (ground truth)
+                            # plt.subplot(2, 4, 8)
+                            # plt.title('Target (Ground Truth)')
+                            # plt.imshow(tgi.permute(1,2,0), cmap='gray')
+                            # plt.axis('off')
+                            #
+                            # plt.tight_layout()
+                            # plt.show()
+                            # %%
+
+                            tgi = torch.unsqueeze(tgi, dim=0)
+                            tgi = tgi.expand(-1, 3, -1, -1)
+
+                            outi = torch.unsqueeze(outi, dim=0)
+                            outi = outi.expand(-1, 3, -1, -1)
+
+                            imgs = torch.cat([dta, tgi, outi], dim=0)
+                            grid_img = make_grid(imgs, nrow=3)
+
+                            # Get class name from the class index
+                            #  TODO
+                            extra_negative_class = 1 if self.add_negative_class == True else 0
+                            class_name_idx = self.training_classes[
+                                i] if i < len(
+                                self.training_classes) else 9 + extra_negative_class
+                            class_name = metric_indx[str(class_name_idx)]
+                            # row shows one class (num_classes_to_predict)
+                            self.writer.add_image(
+                                f'inputs_targets_predictions/{class_name}',
+                                grid_img, epoch)
+
+        # Add loss
+        total_metric_totals['all']['loss'] = loss_history
+
+        return total_metric_totals
+
     def _train_epoch(self, epoch):
         self.logger.info('\n')
 
