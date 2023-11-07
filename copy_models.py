@@ -32,9 +32,8 @@ def main():
 
             attempts = os.listdir('saved/runs/' + exp_dir + '/' + class_run_dir)
             if len(attempts) != 1:
-                continue
-                print(f'Expected 1 attempt in {class_run_dir}, found {len(
-                attempts)}')
+                raise ValueError(f'Expected 1 attempt in {class_run_dir}, found'
+                       f' {len(attempts)}')
             dir_name = attempts[0]
 
             # Get the experiement number from run name
