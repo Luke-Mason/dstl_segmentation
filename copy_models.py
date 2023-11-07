@@ -40,13 +40,16 @@ def main():
             if len(os.listdir('saved/runs/' + exp_dir + '/' + class_run_dir + '/' + dir_name)) < 5:
                 dir_name = attempts[1]
 
-            if len(os.listdir('saved/runs/' + exp_dir + '/' + class_run_dir + '/' + dir_name)) < 5:
+            elif len(os.listdir('saved/runs/' + exp_dir + '/' + class_run_dir
+                               + '/' + dir_name)) < 5:
                 dir_name = attempts[2]
 
-            if len(os.listdir('saved/runs/' + exp_dir + '/' + class_run_dir + '/' + dir_name)) < 5:
+            elif len(os.listdir('saved/runs/' + exp_dir + '/' + class_run_dir
+                               + '/' + dir_name)) < 5:
                 dir_name = attempts[3]
 
-            if len(os.listdir('saved/runs/' + exp_dir + '/' + class_run_dir + '/' + dir_name)) < 5:
+            elif len(os.listdir('saved/runs/' + exp_dir + '/' + class_run_dir
+                               + '/' + dir_name)) < 5:
                 raise ValueError(f'Expected at least 5 files in '
                                  f'{class_run_dir}/{dir_name}, found')
 
