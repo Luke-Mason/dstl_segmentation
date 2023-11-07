@@ -46,7 +46,8 @@ def main():
                 dir_name = attempts[3]
 
             if len(os.listdir('saved/runs/' + exp_dir + '/' + class_run_dir + '/' + dir_name)) < 5:
-                raise ValueError(f'Expected at least 5 files in {class_run_dir}/{dir_name}, found'
+                raise ValueError(f'Expected at least 5 files in '
+                                 f'{class_run_dir}/{dir_name}, found')
 
             # Get the experiement number from run name
             exp = exp_dir.split('_')[1]
