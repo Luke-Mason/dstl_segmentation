@@ -32,7 +32,8 @@ def main():
 
             attempts = os.listdir('saved/runs/' + exp_dir + '/' + class_run_dir)
             if len(attempts) < 1:
-                raise ValueError(f'Expected 1 attempt in {class_run_dir}, found'
+                raise ValueError(f'Expected 1 attempt in saved/runs/{exp_dir}'
+                                 f'/{class_run_dir}, found'
                        f' {len(attempts)}')
             dir_name = attempts[0]
             # if dir_name files is less than 5, then it is not a valid run
