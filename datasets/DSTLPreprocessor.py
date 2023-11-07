@@ -233,6 +233,7 @@ class DSTLPreprocessor:
         # Save the plot to a file (e.g., PNG)
         plt.savefig(os.path.join(self.run_dir, f"{type}_counts_"
                                                f"({timestamp}).png"))
+        plt.close()
 
     def plot_pixel_area_percentages(self, files, type: str):
         timestamp = int(time.time())
@@ -266,6 +267,7 @@ class DSTLPreprocessor:
         # Save the plot to a file (e.g., PNG)
         plt.savefig(os.path.join(self.run_dir,
                                  f"pixel_area_percentages_({timestamp}).png"))
+        plt.close()
 
     def calculate_weights(self, masks):
         num_classes = masks.shape[1]

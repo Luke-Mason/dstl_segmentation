@@ -291,7 +291,7 @@ def main(config, resume):
 
     im_area = dataset_gateway(im_area)
 
-    sorted_by_area = sorted(im_area, key=lambda x: str(x[1]), reverse=True)
+    sorted_by_area = sorted(im_area, key=lambda x: x[1], reverse=True)
     sorted_by_area = [t[0] for t in sorted_by_area]
     logger.debug(f"Sorted Area {sorted_by_area}")
     split_count = config["trainer"]["k_split"] if len(im_area) > config["trainer"]["k_split"] else len(im_area)

@@ -36,20 +36,7 @@ def main():
                                  f'/{class_run_dir}, found'
                        f' {len(attempts)}')
 
-            dir_name = attempts[0]
-            # if dir_name files is less than 5, then it is not a valid run
-            if len(os.listdir('saved/runs/' + exp_dir + '/' + class_run_dir +
-                              '/' + dir_name)) < 5 and len(attempts) > 1:
-                dir_name = attempts[1]
-
-            if len(os.listdir('saved/runs/' + exp_dir + '/' + class_run_dir
-                               + '/' + dir_name)) < 5 and len(attempts) > 2:
-                dir_name = attempts[2]
-
-            if len(os.listdir('saved/runs/' + exp_dir + '/' + class_run_dir
-                               + '/' + dir_name)) < 5 and len(attempts) > 3:
-                dir_name = attempts[3]
-
+            dir_name = attempts[-1]
             if len(os.listdir('saved/runs/' + exp_dir + '/' + class_run_dir
                                + '/' + dir_name)) < 5:
                 raise ValueError(f'Expected at least 5 files in '
@@ -79,7 +66,7 @@ def main():
                     checkpoint += files[-1]
 
                 # Create the models directory if it does not exist
-                models_dir = f'saved/models/ex{exp}/{i}'
+                models_dir = f'saved/models/ex{exp}/{i}/best_model.pth'
                 if not os.path.exists(models_dir):
                     os.makedirs(models_dir)
 

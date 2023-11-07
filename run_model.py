@@ -62,7 +62,6 @@ if __name__ == '__main__':
     parser.add_argument('-c', '--config', default='config.json',type=str,
                         help='Path to the config file (default: config.json)')
     args = parser.parse_args()
-
     config = json.load(open(args.config))
 
     # h, w = map(int, args.size.split(','))
