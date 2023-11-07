@@ -31,7 +31,7 @@ def main():
                 raise ValueError(f'No match found for {pattern} in {class_run_dir}')
 
             attempts = os.listdir('saved/runs/' + exp_dir + '/' + class_run_dir)
-            if len(attempts) != 1:
+            if len(attempts) < 1:
                 raise ValueError(f'Expected 1 attempt in {class_run_dir}, found'
                        f' {len(attempts)}')
             dir_name = attempts[0]
