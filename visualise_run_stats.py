@@ -179,7 +179,7 @@ if __name__ == '__main__':
         run_path = f"saved/runs/dstl_ex{run_id}"
 
         # Check run has already been processed
-        # if not os.path.exists(f"{run_path}.tsv"):
-        tb.tbToCsv(run_path)
+        if not os.path.exists(f"{run_path}.tsv"):
+            tb.tbToCsv(run_path)
 
         visualise_run_stats(i, run_path, run_desc, dir)
