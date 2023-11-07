@@ -35,6 +35,18 @@ def main():
                 raise ValueError(f'Expected 1 attempt in {class_run_dir}, found'
                        f' {len(attempts)}')
             dir_name = attempts[0]
+            # if dir_name files is less than 5, then it is not a valid run
+            if len(os.listdir('saved/runs/' + exp_dir + '/' + class_run_dir + '/' + dir_name)) < 5:
+                dir_name = attempts[1]
+
+            if len(os.listdir('saved/runs/' + exp_dir + '/' + class_run_dir + '/' + dir_name)) < 5:
+                dir_name = attempts[2]
+
+            if len(os.listdir('saved/runs/' + exp_dir + '/' + class_run_dir + '/' + dir_name)) < 5:
+                dir_name = attempts[3]
+
+            if len(os.listdir('saved/runs/' + exp_dir + '/' + class_run_dir + '/' + dir_name)) < 5:
+                raise ValueError(f'Expected at least 5 files in {class_run_dir}/{dir_name}, found'
 
             # Get the experiement number from run name
             exp = exp_dir.split('_')[1]
