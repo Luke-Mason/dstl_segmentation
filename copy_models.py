@@ -39,7 +39,7 @@ def main():
             attempts.sort()
             run_idx = 1
             copy_checkpoint = True
-            while copy_checkpoint:
+            while copy_checkpoint and len(attempts) - run_idx >= 0:
                 copy_checkpoint = False
                 dir_name = attempts[-run_idx]
                 if len(os.listdir('saved/runs/' + exp_dir + '/' + class_run_dir
