@@ -72,7 +72,7 @@ def main():
                     os.makedirs(models_dir)
 
                 # Copy the checkpoint to the models directory
-                os.system(f'cp {checkpoint} {models_dir}')
+                os.system(f'cp {checkpoint} {models_dir}/best_model.pth')
 
 if __name__ == '__main__':
     main()
