@@ -27,6 +27,7 @@ def main():
             if match:
                 # Extract the matched number from the regex group
                 i = match.group(1)
+                print(i)
             else:
                 raise ValueError(f'No match found for {pattern} in {class_run_dir}')
 
@@ -67,12 +68,14 @@ def main():
                     checkpoint += files[-1]
 
                 # Create the models directory if it does not exist
-                models_dir = f'saved/models/ex{exp}/{i}'
+                models_dir = f'saved/models/ex{exp}/{i}/'
                 if not os.path.exists(models_dir):
                     os.makedirs(models_dir)
 
                 # Copy the checkpoint to the models directory
-                os.system(f'cp {checkpoint} {models_dir}/best_model.pth')
+                os.system(f'cp {checkpoint} {models_dir}')
+            else:
+                raise ValueError(f'Checkpoint {checkpoint} does not exist')
 
 if __name__ == '__main__':
     main()
