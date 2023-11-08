@@ -36,6 +36,7 @@ def main():
                                  f'/{class_run_dir}, found'
                        f' {len(attempts)}')
 
+            attempts.sort()
             dir_name = attempts[-1]
             if len(os.listdir('saved/runs/' + exp_dir + '/' + class_run_dir
                                + '/' + dir_name)) < 5:
