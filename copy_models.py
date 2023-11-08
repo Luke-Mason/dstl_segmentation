@@ -67,12 +67,12 @@ def main():
                     checkpoint += files[-1]
 
                 # Create the models directory if it does not exist
-                models_dir = f'saved/models/ex{exp}/{i}/best_model.pth'
+                models_dir = f'saved/models/ex{exp}/{i}'
                 if not os.path.exists(models_dir):
                     os.makedirs(models_dir)
 
                 # Copy the checkpoint to the models directory
-                os.system(f'cp {checkpoint} {models_dir}')
+                os.system(f'cp {checkpoint} {models_dir}/best_model.pth')
 
 if __name__ == '__main__':
     main()
