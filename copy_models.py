@@ -26,8 +26,7 @@ def main():
             # Check if a match was found
             if match:
                 # Extract the matched number from the regex group
-                i = match.group(1)
-                print(i)
+                class_idx = match.group(1)
             else:
                 raise ValueError(f'No match found for {pattern} in {class_run_dir}')
 
@@ -38,44 +37,49 @@ def main():
                        f' {len(attempts)}')
 
             attempts.sort()
-            dir_name = attempts[-1]
-            if len(os.listdir('saved/runs/' + exp_dir + '/' + class_run_dir
-                               + '/' + dir_name)) < 5:
-                raise ValueError(f'Expected at least 5 files in '
-                                 f'saved/runs/{exp_dir}/{class_run_dir}'
-                                 f'/{dir_name}, found')
+            run_idx = 1
+            copy_checkpoint = True
+            while copy_checkpoint:
+                copy_checkpoint = False
+                dir_name = attempts[-run_idx]
+                if len(os.listdir('saved/runs/' + exp_dir + '/' + class_run_dir
+                                   + '/' + dir_name)) < 5:
+                    raise ValueError(f'Expected at least 5 files in '
+                                     f'saved/runs/{exp_dir}/{class_run_dir}'
+                                     f'/{dir_name}, found')
 
-            # Get the experiement number from run name
-            exp = exp_dir.split('_')[1]
+                # Get the experiement number from run name
+                exp = exp_dir.split('_')[1]
 
-            # Remove first 2 characters
-            exp = exp[2:]
+                # Remove first 2 characters
+                exp = exp[2:]
 
-            # cp saved/checkpoints/dstl_ex<exp>/<name>/K_0/ saved/models/ex<exp>/<idx>
-            checkpoint = f'saved/checkpoints/{exp_dir}/{dir_name}/K_0/'
-            if os.path.exists(checkpoint):
-                files = os.listdir(checkpoint)
-                # Check files is not empty
-                if not files:
-                    raise ValueError(f'No files in {checkpoint}')
+                # cp saved/checkpoints/dstl_ex<exp>/<name>/K_0/ saved/models/ex<exp>/<idx>
+                checkpoint = f'saved/checkpoints/{exp_dir}/{dir_name}/K_0/'
+                if os.path.exists(checkpoint):
+                    files = os.listdir(checkpoint)
+                    # Check files is not empty
+                    if not files:
+                        raise ValueError(f'No files in {checkpoint}')
 
-                # get best_model.pth or if it does not exist, sort the files
-                # by file name and get the largest filename in the list
-                if 'best_model.pth' in files:
-                    checkpoint += 'best_model.pth'
+                    # get best_model.pth or if it does not exist, sort the files
+                    # by file name and get the largest filename in the list
+                    if 'best_model.pth' in files:
+                        checkpoint += 'best_model.pth'
+                    else:
+                        files.sort()
+                        checkpoint += files[-1]
+
+                    # Create the models directory if it does not exist
+                    models_dir = f'saved/models/ex{exp}/{class_idx}'
+                    if not os.path.exists(models_dir):
+                        os.makedirs(models_dir)
+
+                    # Copy the checkpoint to the models directory
+                    os.system(f'cp {checkpoint} {models_dir}/best_model.pth')
                 else:
-                    files.sort()
-                    checkpoint += files[-1]
-
-                # Create the models directory if it does not exist
-                models_dir = f'saved/models/ex{exp}/{i}/'
-                if not os.path.exists(models_dir):
-                    os.makedirs(models_dir)
-
-                # Copy the checkpoint to the models directory
-                os.system(f'cp {checkpoint} {models_dir}')
-            else:
-                raise ValueError(f'Checkpoint {checkpoint} does not exist')
+                    copy_checkpoint = True
+                    run_idx += 1
 
 if __name__ == '__main__':
     main()
