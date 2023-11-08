@@ -166,9 +166,7 @@ class BaseTrainer:
                         })
                     stats[class_name][metric_name]['train'].append(total)
             metrics = {}
-            if (self.val_loader is not None and self.do_validation and epoch %
-                    self.config['trainer'][
-                'val_per_epochs'] == 0):
+            if (self.do_validation and epoch % self.config['trainer']['val_per_epochs'] == 0):
                 epoch_stats = self._valid_epoch(epoch)
                 for class_name, metric_totals in epoch_stats.items():
                     if class_name not in stats:
@@ -266,8 +264,8 @@ class BaseTrainer:
 
         self.logger.info(f'Checkpoint <{resume_path}> (epoch {self.start_epoch}) was loaded')
 
-    def _run_model(self):
-        raise NotImplementedError
+    # def _run_model(self):
+    #     raise NotImplementedError
 
     def _train_epoch(self, epoch):
         raise NotImplementedError

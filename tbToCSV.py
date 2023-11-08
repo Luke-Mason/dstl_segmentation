@@ -85,8 +85,9 @@ def tbToCsv(mainPath: str):
     combined = pd.concat(data, axis=1)
 
     # Remove steps column and add it back as an index of row num
-    combined = combined.filter(regex='^(?!step$)')
-    combined['step'] = range(len(combined))
+    if 'step' in combined.columns.tolist():
+        combined = combined.filter(regex='^(?!step$)')
+    combined['step'] = list(range(len(combined)))
     combined = combined.set_index('step')
     combined.to_csv(f"{mainPath}.tsv", index=True, sep='\t')
 
