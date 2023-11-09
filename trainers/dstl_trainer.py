@@ -267,7 +267,8 @@ class DSTLTrainer(BaseTrainer):
                         # Assuming 'src_tensor' is your PyTorch tensor
                         # Convert PyTorch tensor to NumPy array
                         # Convert grayscale to BGR
-                        dra_image = cv2.cvtColor(dta, cv2.COLOR_GRAY2BGR)
+                        dra_image = cv2.cvtColor(dta.cpu().numpy(),
+                                                 cv2.COLOR_GRAY2BGR)
 
                         # Perform the operations on each channel
                         for c in range(3):
