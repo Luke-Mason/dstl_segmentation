@@ -272,7 +272,7 @@ class DSTLTrainer(BaseTrainer):
                         self.logger.info(
                             f"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
-                        dra_image = cv2.cvtColor(dta, cv2.COLOR_GRAY2BGR)
+                        dra_image = cv2.cvtColor(dta, cv2.COLOR_RGB2BGR)
 
                         # Perform the operations on each channel
                         for c in range(dta.shape[2]):
