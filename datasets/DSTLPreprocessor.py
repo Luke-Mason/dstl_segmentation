@@ -147,8 +147,7 @@ class DSTLPreprocessor:
     def get_image_dims(self, image_index: str) -> np.ndarray:
         index, image_id, _ = self._wkt_data[image_index]
 
-        image = np.load(Path(self.get_stage_2_file_path(image_id) +
-                             ".data.npy"),  allow_pickle=True)
+        image = np.load(Path(self.get_stage_2_file_path(image_id) + ".data.npy"),  allow_pickle=True)
 
         return image.shape
 

@@ -34,14 +34,15 @@ import matplotlib.pyplot as plt
 import tifffile as tiff
 from visualise_run_stats import ids
 
-def overlay_masks_on_image(rgb_image, target_mask, output_mask, output_path:
+def overlay_masks_on_image(src_image, target_mask, output_mask, output_path:
 str, class_ids, experiment_id):
+#%%
     h = None
     w = None
 
     # Dynamic range adjustment for the file
     # Thank you u1234x1234 for this dra code
-    dra_image = cv2.cvtColor(rgb_image, cv2.COLOR_RGB2BGR)
+    dra_image = cv2.cvtColor(src_image, cv2.COLOR_GRAY2BGR)
     for c in range(3):
         min_val, max_val = np.percentile(dra_image[:, :, c], [0.1, 99.9])
         dra_image[:, :, c] = 255 * (dra_image[:, :, c] - min_val) / (max_val - min_val)
@@ -52,21 +53,29 @@ str, class_ids, experiment_id):
 
     for class_pos, class_index in enumerate(class_ids):
         mask_out = output_mask[:, :, [class_pos]]
-        mask_target = target_mask[:, :, [class_pos]]
         class_name = metric_indx[str(class_ids[0])]
         mask_color = mask_out * hex_to_rgb(obj_colors[class_name])
+
+        mask_target = target_mask[:, :, [class_pos]]
+        target_color = mask_target * hex_to_rgb("#FFFFFF")
+
+        combined_mask = np.bitwise_or(mask_out, mask_target)
 
         # Get inverse of mask out because we want to apply a addition
         # operator to the masked pixels so they plug together like two puzzle
         # pieces togther to make 1 image.
-        mask_out_inv = np.invert(mask_out.astype(np.bool_))
+        combined_mask_inv = np.invert(combined_mask.astype(np.bool_))
 
         # Get the mask pixels of the image with bitwise and operation
-        rgb_mask_inv = np.bitwise_and(dra_image, mask_out_inv * 255)
-        rgb_mask = np.bitwise_and(dra_image, mask_out * 255)
+        rgb_mask_inv = np.bitwise_and(dra_image, combined_mask_inv * 255)
+        rgb_mask = np.bitwise_and(dra_image, combined_mask * 255)
+        rgb_mask = np.bitwise_or(rgb_mask, target_color)
 
         # Apply alpha to those cropped pixels
         rgb_mask = cv2.addWeighted(rgb_mask, 0.5, mask_color, 0.5, 0)
+        # plt.imshow(rgb_mask)
+        # plt.show()
+
 
         image = rgb_mask_inv + rgb_mask
         image = Image.fromarray(image.astype(np.uint8))
@@ -74,7 +83,7 @@ str, class_ids, experiment_id):
         image.save(f"tmp/{ids[int(experiment_id)]}-{object_idx}-"
                        f"{class_index + 1}"
                        f"_{output_path}")
-
+#%%
 
 def hex_to_rgb(hex_color):
     # Remove the '#' character if present
@@ -603,11 +612,12 @@ def main(config, model_pth, run_model: bool):
         idx, image_id, __ = _wkt_data[0]
         tc = training_classes_ + [10] if add_negative_class else (
             training_classes_)
-        rgb_image_path = dstl_data_path + "/three_band/" + image_id + ".tif"
+        image_path = (dstl_data_path + "/sixteen_band/sixteen_band/" +
+                      image_id + "_P.tif")
 
         # Load the RGB image
-        rgb_image = tiff.imread(rgb_image_path)
-        rgb_image = rgb_image.transpose((1, 2, 0))
+        image = tiff.imread(image_path)
+        image = np.expand_dims(image, axis=2)
 
         # file name stuff
         pattern = r'saved/models/ex(.+)-.+/'
@@ -629,9 +639,9 @@ def main(config, model_pth, run_model: bool):
             target_mask = target_mask.cpu().numpy().transpose(1, 2, 0)
 
             # Assumed the patch is the same size as the image
-            rgb_image_patch = rgb_image[x:x + patch_size, y:y + patch_size]
+            image_patch = image[x:x + patch_size, y:y + patch_size]
 
-            overlay_masks_on_image(rgb_image_patch, target_mask, output_mask,
+            overlay_masks_on_image(image_patch, target_mask, output_mask,
                                    str(f"{x}_{y}.png"), tc, experiment_id)
 
 

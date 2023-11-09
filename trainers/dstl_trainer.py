@@ -264,7 +264,34 @@ class DSTLTrainer(BaseTrainer):
                         dta, tgt, out = data[k], target[k], output[k]
 
                         dta = dta * 2047
-                        dta = torch.tensor(dta).to(self.device)
+                        # Assuming 'src_tensor' is your PyTorch tensor
+                        # Convert PyTorch tensor to NumPy array
+                        # Convert grayscale to BGR
+                        dra_image = cv2.cvtColor(dta, cv2.COLOR_GRAY2BGR)
+
+                        # Perform the operations on each channel
+                        for c in range(3):
+                            min_val, max_val = np.percentile(dra_image[:, :, c],
+                                                             [0.1, 99.9])
+                            dra_image[:, :, c] = 255 * (
+                                        dra_image[:, :, c] - min_val) / (
+                                                             max_val - min_val)
+                            dra_image[:, :, c] = np.clip(dra_image[:, :, c], 0,
+                                                         255)
+
+                        # Convert the result back to uint8
+                        dra_image = dra_image.astype(np.uint8)
+
+                        # Resize if needed
+                        if h and w:
+                            dra_image = cv2.resize(dra_image, (w, h),
+                                                   interpolation=cv2.INTER_LANCZOS4)
+
+                        # Convert NumPy array back to PyTorch tensor
+                        dra_tensor = torch.from_numpy(dra_image).to(
+                            src_tensor.device)
+
+                        dta = torch.tensor(dra_tensor).to(self.device)
                         _dta = self.vis_transform(dta.to(torch.uint8))
                         dta = torch.unsqueeze(_dta, dim=0)
                         for i in range(self.num_classes):
