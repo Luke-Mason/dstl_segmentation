@@ -18,7 +18,7 @@ from utils.metrics import (eval_metrics, recall, precision, f1_score,
 from utils import metric_indx
 import logging
 from utils import transforms as local_transforms
-
+import cv2
 
 class DSTLTrainer(BaseTrainer):
     def __init__(self, start_time, model, loss, resume, config,
