@@ -42,8 +42,8 @@ str, class_ids, experiment_id):
 
     # Dynamic range adjustment for the file
     # Thank you u1234x1234 for this dra code
-    dra_image = cv2.cvtColor(src_image, cv2.COLOR_GRAY2BGR)
-    for c in range(3):
+    dra_image = cv2.cvtColor(src_image, cv2.COLOR_RGB2BGR)
+    for c in range(src_image.shape[2]):
         min_val, max_val = np.percentile(dra_image[:, :, c], [0.1, 99.9])
         dra_image[:, :, c] = 255 * (dra_image[:, :, c] - min_val) / (max_val - min_val)
         dra_image[:, :, c] = np.clip(dra_image[:, :, c], 0, 255)
@@ -601,11 +601,11 @@ def main(config, model_pth, run_model: bool):
             num_classes=num_classes,
             add_negative_class=add_negative_class,
         )
-        patch_size = config['all_loader']['preprocessing']['patch_size']
-        overlap_pixels = config['all_loader']['preprocessing']['overlap_pixels']
-        step_size = patch_size - overlap_pixels
-        C, H, W = preprocessor.get_image_dims(0)
-        offsets = preprocessor._gen_chunk_offsets(W, H, step_size)
+        # patch_size = config['all_loader']['preprocessing']['patch_size']
+        # overlap_pixels = config['all_loader']['preprocessing']['overlap_pixels']
+        # step_size = patch_size - overlap_pixels
+        # C, H, W = preprocessor.get_image_dims(0)
+        # offsets = preprocessor._gen_chunk_offsets(W, H, step_size)
 
         outputs, targets = trainer.train()
 
@@ -633,14 +633,9 @@ def main(config, model_pth, run_model: bool):
             raise ValueError(f'No match found for {pattern} in {model_pth}')
 
 
-        for output_mask, target_mask, offset in zip(outputs, targets, offsets):
-            x, y = offset
+        for image_patch, output_mask, target_mask in zip(val_patch_files, outputs, targets):
             output_mask = output_mask.cpu().numpy().transpose(1, 2, 0)
             target_mask = target_mask.cpu().numpy().transpose(1, 2, 0)
-
-            # Assumed the patch is the same size as the image
-            image_patch = image[x:x + patch_size, y:y + patch_size]
-
             overlay_masks_on_image(image_patch, target_mask, output_mask,
                                    str(f"{x}_{y}.png"), tc, experiment_id)
 
