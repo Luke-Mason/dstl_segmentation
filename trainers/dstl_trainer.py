@@ -287,11 +287,6 @@ class DSTLTrainer(BaseTrainer):
                         # Convert the result back to uint8
                         dra_image = dra_image.astype(np.uint8)
 
-                        # Resize if needed
-                        if h and w:
-                            dra_image = cv2.resize(dra_image, (w, h),
-                                                   interpolation=cv2.INTER_LANCZOS4)
-
                         # Convert NumPy array back to PyTorch tensor
                         dra_tensor = torch.from_numpy(dra_image.transpose((2, 0, 1)
 
