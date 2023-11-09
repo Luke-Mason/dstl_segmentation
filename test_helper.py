@@ -1,4 +1,4 @@
-restricted = False
+restricted = True
 def dataset_gateway(arr):
     return arr[:5] if restricted else arr
 
