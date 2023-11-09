@@ -144,12 +144,20 @@ class DSTLPreprocessor:
             '%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
         self.logger.addHandler(handler)
 
+    def get_image_dims(self, image_index: str) -> np.ndarray:
+        index, image_id, _ = self._wkt_data[image_index]
+
+        image = np.load(Path(self.get_stage_2_file_path(image_id) +
+                             ".data.npy"),  allow_pickle=True)
+
+        return image.shape
+
     def _set_files(self):
         step_size = self.patch_size - self.overlap_pixels
         self.files = []  # type: List[Tuple[np.ndarray, np.ndarray, str]]
 
         # Preprocess Images, ensure their existences.
-        for [image_id, class_poly] in self._wkt_data:
+        for (_,image_id, class_poly) in self._wkt_data:
             stage_1_file_path = self.get_stage_1_file_path(image_id)
             if not os.path.exists(stage_1_file_path + ".data.npy"):
                 self._preprocess_image_stage_1(image_id, stage_1_file_path)
@@ -165,7 +173,7 @@ class DSTLPreprocessor:
                 self._preprocess_image_stage_2(image_id, stage_1_file_path,stage_2_file_path)
 
         # Load Images
-        for index, [image_id, _] in enumerate(self._wkt_data):
+        for (index, image_id, _) in self._wkt_data:
             # Load image with 3 bands
             image = np.load(Path(self.get_stage_2_file_path(image_id) +
                                  ".data.npy"),  allow_pickle=True)
@@ -207,16 +215,15 @@ class DSTLPreprocessor:
 
         self.logger.debug(f"Train LEN: {len(self.train_files)}")
         self.logger.debug(f"Val LEN: {len(self.val_files)}")
-        self.logger.info(f"Total files: Train - {len(self.train_files)}, "
-                         f"Val - {len(self.val_files)}")
-        if len(self.train_files) == 0 or len(self.val_files) == 0:
-            raise ValueError("No training files were found. Please check the "
-                                "data and try again.")
+        self.logger.info(f"Total files: Train - {len(self.train_files)}, Val - {len(self.val_files)}")
+        if (len(self.train_indices) > 0 and len(self.train_files) == 0) or len(self.val_files) == 0:
+            raise ValueError("No training files were found. Please check the data and try again.")
 
-        self.save_count_plot(self.train_files, "train")
-        self.save_count_plot(self.val_files, "val")
-        self.plot_pixel_area_percentages(self.train_files, "train")
-        self.plot_pixel_area_percentages(self.val_files, "val")
+        if len(self.train_indices) > 0:
+            self.save_count_plot(self.train_files, "train")
+            self.save_count_plot(self.val_files, "val")
+            self.plot_pixel_area_percentages(self.train_files, "train")
+            self.plot_pixel_area_percentages(self.val_files, "val")
 
     def save_count_plot(self, files, type: str):
         timestamp = int(time.time())
@@ -511,7 +518,6 @@ class DSTLPreprocessor:
         im_m = im_m_src.read()
         im_a = im_a_src.read()
 
-        w, h = im_rgb.shape[1:]
 
         # TODO This has not been tested yet
         if self.align_images:
@@ -534,7 +540,9 @@ class DSTLPreprocessor:
         else:
             raise ValueError(f'Invalid reference file type: {self.reference_file_type}')
 
-        # Resize the images to be the same size as RGB.
+        w, h = ref_img.shape[1:]
+
+        # Resize the images to be the same size as ref.
         # Sometimes panchromatic is a couple of pixels different to RGB
         if im_p.shape != ref_img.shape[1:]:
             im_p = cv2.resize(im_p.transpose([1, 2, 0]), (h, w),

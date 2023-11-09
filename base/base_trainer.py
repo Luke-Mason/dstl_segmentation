@@ -69,9 +69,10 @@ class BaseTrainer:
         else:
             trainable_params = filter(lambda p:p.requires_grad, self.model.parameters())
         self.optimizer = get_instance(torch.optim, 'optimizer', config, trainable_params)
-        print(config['lr_scheduler']['args'])
-        print("ITERATIONS PER EPOCH: ", len(train_loader))
-        self.lr_scheduler = getattr(utils.lr_scheduler, config['lr_scheduler']['type'])(optimizer=self.optimizer,
+        if train_loader is not None:
+            print(config['lr_scheduler']['args'])
+            print("ITERATIONS PER EPOCH: ", len(train_loader))
+            self.lr_scheduler = getattr(utils.lr_scheduler, config['lr_scheduler']['type'])(optimizer=self.optimizer,
                                      num_epochs=self.epochs,
                                      _iters_per_epoch=len(train_loader),
                                      **config['lr_scheduler']['args']
@@ -89,8 +90,6 @@ class BaseTrainer:
             self.early_stoping = cfg_trainer.get('early_stop', math.inf)
 
         # CHECKPOINTS & TENSORBOARD
-
-
         fold_name = (f"{'K_' + str(k_fold) if k_fold is not None else 'run'}")
 
         path = os.path.join(self.config['name'], start_time, fold_name)
@@ -145,9 +144,8 @@ class BaseTrainer:
         return device, available_gpus
     
     def train(self):
-        if self.val_loader is None:
-            self._run_model()
-        return
+        if self.train_loader is None:
+            return self._run_model()
 
         stats = dict()
 
@@ -247,7 +245,9 @@ class BaseTrainer:
 
     def _resume_checkpoint(self, resume_path):
         self.logger.info(f'Loading checkpoint : {resume_path}')
-        checkpoint = torch.load(resume_path)
+        self.device, availble_gpus = self._get_available_devices(self.config['n_gpu'])
+
+        checkpoint = torch.load(resume_path, map_location=self.device)
 
         # Load last run info, the model params, the optimizer and the loggers
         self.start_epoch = checkpoint['epoch'] + 1
@@ -264,8 +264,8 @@ class BaseTrainer:
 
         self.logger.info(f'Checkpoint <{resume_path}> (epoch {self.start_epoch}) was loaded')
 
-    # def _run_model(self):
-    #     raise NotImplementedError
+    def _run_model(self):
+        raise NotImplementedError
 
     def _train_epoch(self, epoch):
         raise NotImplementedError
