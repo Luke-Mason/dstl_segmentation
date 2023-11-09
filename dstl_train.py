@@ -625,8 +625,8 @@ def main(config, model_pth, run_model: bool):
 
         for output_mask, target_mask, offset in zip(outputs, targets, offsets):
             x, y = offset
-            output_mask = output_mask.numpy().transpose(1, 2, 0)
-            target_mask = target_mask.numpy().transpose(1, 2, 0)
+            output_mask = output_mask.cpu().numpy().transpose(1, 2, 0)
+            target_mask = target_mask.cpu().numpy().transpose(1, 2, 0)
 
             # Assumed the patch is the same size as the image
             rgb_image_patch = rgb_image[x:x + patch_size, y:y + patch_size]
