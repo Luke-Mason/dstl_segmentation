@@ -288,12 +288,7 @@ class DSTLTrainer(BaseTrainer):
                         dra_image = dra_image.astype(np.uint8)
 
                         # Convert NumPy array back to PyTorch tensor
-                        dra_tensor = torch.from_numpy(dra_image.transpose((2, 0, 1)
-
-                        )).to(
-                            src_tensor.device)
-
-                        dta = torch.tensor(dra_tensor).to(self.device)
+                        dta = torch.tensor(dra_image.transpose((2, 0, 1))).to(self.device)
                         _dta = self.vis_transform(dta.to(torch.uint8))
                         dta = torch.unsqueeze(_dta, dim=0)
                         for i in range(self.num_classes):
