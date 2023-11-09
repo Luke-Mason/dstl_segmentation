@@ -1,12 +1,16 @@
 from torch.utils.data import DataLoader
-from torch.utils.data.sampler import WeightedRandomSampler
+from torch.utils.data.sampler import WeightedRandomSampler, BatchSampler, SequentialSampler
 import math
 
 class BaseDataLoader(DataLoader):
-    def __init__(self, dataset, batch_size, shuffle, num_workers, weights):
+    def __init__(self, dataset, batch_size, shuffle, num_workers, weights, run_model):
         self.dataset = dataset
         self.nbr_examples = len(dataset)
-        sampler = WeightedRandomSampler(weights, batch_size * math.ceil(self.nbr_examples / batch_size), True)
+        if not run_model:
+            sampler = WeightedRandomSampler(weights, batch_size * math.ceil(self.nbr_examples / batch_size), True)
+        else:
+            sampler = SequentialSampler(dataset)
+
         self.init_kwargs = {
             'dataset': dataset,
             'batch_size': batch_size,

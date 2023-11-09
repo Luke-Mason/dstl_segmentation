@@ -32,9 +32,10 @@ class DSTLLoader(BaseDataLoader):
     def __init__(
             self,
             files,
-            weights,
             batch_size,
+            weights=None,
             num_workers=1,
+            run_model=False,
             shuffle=False,
             flip=False,
             rotate=False,
@@ -67,5 +68,5 @@ class DSTLLoader(BaseDataLoader):
 
         # Convert the image indexes into files indexes.
         super(DSTLLoader, self).__init__(self.dataset, batch_size, shuffle,
-                                         num_workers, weights)
+                                         num_workers, weights, run_model)
 

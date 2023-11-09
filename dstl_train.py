@@ -23,8 +23,80 @@ from utils.metrics import (eval_metrics, recall, precision, f1_score,
 from test_helper import dataset_gateway
 import utils
 from utils import metric_indx
+from visualise_run_stats import obj_colors
 
 torch.cuda.empty_cache()
+import re
+from PIL import Image
+import numpy as np
+import cv2
+import matplotlib.pyplot as plt
+import tifffile as tiff
+from visualise_run_stats import ids
+
+def overlay_masks_on_image(rgb_image, target_mask, output_mask, output_path:
+str, class_ids, experiment_id):
+    h = None
+    w = None
+
+    # Dynamic range adjustment for the file
+    # Thank you u1234x1234 for this dra code
+    dra_image = cv2.cvtColor(rgb_image, cv2.COLOR_RGB2BGR)
+    for c in range(3):
+        min_val, max_val = np.percentile(dra_image[:, :, c], [0.1, 99.9])
+        dra_image[:, :, c] = 255 * (dra_image[:, :, c] - min_val) / (max_val - min_val)
+        dra_image[:, :, c] = np.clip(dra_image[:, :, c], 0, 255)
+    dra_image = (dra_image).astype(np.uint8)
+    if h and w:
+        dra_image = cv2.resize(dra_image, (w, h), interpolation=cv2.INTER_LANCZOS4)
+
+    for class_pos, class_index in enumerate(class_ids):
+        mask_out = output_mask[:, :, [class_pos]]
+        mask_target = target_mask[:, :, [class_pos]]
+        class_name = metric_indx[str(class_ids[0])]
+        mask_color = mask_out * hex_to_rgb(obj_colors[class_name])
+
+        # Get inverse of mask out because we want to apply a addition
+        # operator to the masked pixels so they plug together like two puzzle
+        # pieces togther to make 1 image.
+        mask_out_inv = np.invert(mask_out.astype(np.bool_))
+
+        # Get the mask pixels of the image with bitwise and operation
+        rgb_mask_inv = np.bitwise_and(dra_image, mask_out_inv * 255)
+        rgb_mask = np.bitwise_and(dra_image, mask_out * 255)
+
+        # Apply alpha to those cropped pixels
+        rgb_mask = cv2.addWeighted(rgb_mask, 0.5, mask_color, 0.5, 0)
+
+        image = rgb_mask_inv + rgb_mask
+        image = Image.fromarray(image.astype(np.uint8))
+        object_idx = class_ids[0] + 1
+        image.save(f"tmp/{ids[int(experiment_id)]}-{object_idx}-"
+                       f"{class_index + 1}"
+                       f"_{output_path}")
+
+
+def hex_to_rgb(hex_color):
+    # Remove the '#' character if present
+    hex_color = hex_color.lstrip('#')
+
+    # Convert the hexadecimal string to integers for R, G, and B
+    r = int(hex_color[0:2], 16)
+    g = int(hex_color[2:4], 16)
+    b = int(hex_color[4:6], 16)
+
+    return (r, g, b)
+
+def convert_mask_to_color(mask, class_ids):
+    mask_color = np.zeros(mask.shape[1:] + (3,))
+    mask_color = mask_color.astype(np.uint8)
+    for class_pos, class_index in enumerate(class_ids):
+        class_name = metric_indx[str(class_index)]
+        colour = obj_colors[class_name]
+
+        mask_color[mask[class_pos] == 1] = hex_to_rgb(colour)
+
+    return mask_color
 
 
 def get_preprocessor(config, root, _wkt_data, start_time,
@@ -246,7 +318,7 @@ def write_stats_to_tensorboard(logger, writer, do_validation, val_per_epochs,
     # writer.add_scalars(f'{metric_name}/{class_name}', scalars, (epoch + 1))
 
 
-def main(config, resume):
+def main(config, model_pth, run_model: bool):
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
 
@@ -275,34 +347,38 @@ def main(config, resume):
         # Add the polygon to the dictionary
         _wkt_data.setdefault(im_id, {})[int(class_type)] = poly
 
-    _wkt_data = list(_wkt_data.items())
-    _wkt_data = dataset_gateway(_wkt_data)
-
-    training_classes_ = config['all_loader']['preprocessing'][
-        'training_classes']
+    image_ids = list(_wkt_data.keys())
+    training_classes_ = config['all_loader']['preprocessing']['training_classes']
 
     # Stratified K-Fold
-    mask_stats = json.loads(Path(
-        'dataloaders/labels/dstl-stats.json').read_text())
-    image_ids = df['ImageId'].unique()
+    mask_stats = json.loads(Path('dataloaders/labels/dstl-stats.json')
+                            .read_text())
+
     im_area = [(idx, np.mean([mask_stats[im_id][str(cls)]['area'] for cls
                                 in training_classes_]))
                for idx, im_id in enumerate(image_ids)]
 
-    im_area = dataset_gateway(im_area)
-
     sorted_by_area = sorted(im_area, key=lambda x: x[1], reverse=True)
     sorted_by_area = [t[0] for t in sorted_by_area]
     logger.debug(f"Sorted Area {sorted_by_area}")
-    split_count = config["trainer"]["k_split"] if len(im_area) > config["trainer"]["k_split"] else len(im_area)
-    arr = stratified_split(sorted_by_area, split_count)
-    stratisfied_indices = arr.flatten()
+
+    sorted_by_area = dataset_gateway(sorted_by_area)
+    _wkt_data = [(idx, key, value) for idx, (key, value) in enumerate(list(_wkt_data.items()))]
+    if run_model:
+        highest_class_in_image_idx = sorted_by_area[0]
+        sorted_by_area = [highest_class_in_image_idx]
+        _wkt_data = [(idx, key, value) for (idx, key, value) in _wkt_data if idx == highest_class_in_image_idx]
+    else:
+        _wkt_data = [(idx, key, value) for (idx, key, value) in _wkt_data if idx in sorted_by_area]
+        split_count = config["trainer"]["k_split"] if len(im_area) > config["trainer"]["k_split"] else len(im_area)
+        arr = stratified_split(sorted_by_area, split_count)
+        stratisfied_indices = arr.flatten()
 
     # LOSS
     loss = getattr(losses, config['loss'])(threshold=config['threshold'])
     start_time = datetime.datetime.now().strftime('%m-%d_%H-%M')
 
-    if config["trainer"]["val"]:
+    if config["trainer"]["val"] and not run_model:
         # Split the data into K folds
         shuffle_ = config["trainer"]["k_shuffle"]
         random_state_ = config["trainer"]["k_random_state"] if shuffle_ else None
@@ -412,7 +488,7 @@ def main(config, resume):
                 k_fold=fold_indx,
                 model=model,
                 loss=loss,
-                resume=resume,
+                resume=model_pth,
                 config=config,
                 train_loader=train_loader,
                 val_loader=val_loader,
@@ -466,32 +542,97 @@ def main(config, resume):
                                    fold_stats)
 
     else:
-        # DATA LOADERS
-        train_loader = get_loader_instance('train_loader', _wkt_data, config, start_time)
-        val_loader = get_loader_instance('val_loader', _wkt_data, config, start_time)
+        preprocessor = get_preprocessor(config, dstl_data_path,
+                                        _wkt_data, start_time,
+                                        train_indices=[],
+                                        val_indices=sorted_by_area)
 
-        # MODELMODEL
-        model = get_instance(models, 'arch', config, len(training_classes_) + 1)
+        __, val_patch_files = preprocessor.get_files()
+
+
+        config['all_loader']['args']['batch_size'] = len(val_patch_files)
+
+        # Create train and valiation data loaders that only load the data
+        # into batch by seleecting indexes from the list of indices we
+        # give each loader.
+        all_loader_config = {
+            "batch_size": config["all_loader"]["args"]["batch_size"],
+            "num_workers": config["all_loader"]["args"]["num_workers"],
+            "return_id": config["all_loader"]["args"]["return_id"],
+        }
+        logger.info("Creating loaders..")
+
+        data_loader = DSTLLoader(
+            **all_loader_config,
+            files=val_patch_files,
+            run_model=True,
+            **config["val_loader"]["args"]
+        )
+
+        add_negative_class = config["all_loader"]["args"]["add_negative_class"]
+        negative_class_bonus = 1 if add_negative_class else 0
+        # MODEL
+        num_classes = len(training_classes_) + negative_class_bonus
+        model = get_instance(models, 'arch', config, num_classes)
+
+        logger.info("Creating trainer..")
 
         # TRAINING
         trainer = DSTLTrainer(
             start_time=start_time,
             model=model,
             loss=loss,
-            resume=resume,
+            resume=model_pth,
             config=config,
-            train_loader=train_loader,
-            val_loader=val_loader,
+            val_loader=data_loader,
             train_logger=logger,
             root=dstl_data_path,
             training_classes=training_classes_,
             do_validation=config['trainer']['val'],
-            num_classes=len(training_classes_) + 1,
-            add_negative_class=config["all_loader"]["args"]["add_negative_class"],
-            k_fold=0,
+            num_classes=num_classes,
+            add_negative_class=add_negative_class,
         )
+        patch_size = config['all_loader']['preprocessing']['patch_size']
+        overlap_pixels = config['all_loader']['preprocessing']['overlap_pixels']
+        step_size = patch_size - overlap_pixels
+        C, H, W = preprocessor.get_image_dims(0)
+        offsets = preprocessor._gen_chunk_offsets(W, H, step_size)
 
-        trainer.train()
+        outputs, targets = trainer.train()
+
+        idx, image_id, __ = _wkt_data[0]
+        tc = training_classes_ + [10] if add_negative_class else (
+            training_classes_)
+        rgb_image_path = dstl_data_path + "/three_band/" + image_id + ".tif"
+
+        # Load the RGB image
+        rgb_image = tiff.imread(rgb_image_path)
+        rgb_image = rgb_image.transpose((1, 2, 0))
+
+        # file name stuff
+        pattern = r'saved/models/ex(.+)-.+/'
+
+        # Use re.search to find the pattern in the input string
+        match = re.search(pattern, model_pth)
+
+        # Check if a match was found
+        if match:
+            # Extract the matched number from the regex group
+            experiment_id = match.group(1)
+        else:
+            raise ValueError(f'No match found for {pattern} in {model_pth}')
+
+
+        for output_mask, target_mask, offset in zip(outputs, targets, offsets):
+            x, y = offset
+            output_mask = output_mask.numpy().transpose(1, 2, 0)
+            target_mask = target_mask.numpy().transpose(1, 2, 0)
+
+            # Assumed the patch is the same size as the image
+            rgb_image_patch = rgb_image[x:x + patch_size, y:y + patch_size]
+
+            overlay_masks_on_image(rgb_image_patch, target_mask, output_mask,
+                                   str(f"{x}_{y}.png"), tc, experiment_id)
 
 
 if __name__ == '__main__':
@@ -499,10 +640,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='PyTorch Training')
     parser.add_argument('-c', '--config', default='config.json', type=str,
                         help='Path to the config file (default: config.json)')
-    parser.add_argument('-r', '--resume', default=None, type=str,
+    parser.add_argument('-m', '--model', default=None, type=str,
                         help='Path to the .pth model checkpoint to resume training')
     parser.add_argument('-d', '--device', default=None, type=str,
                         help='indices of GPUs to enable (default: all)')
+    parser.add_argument('-r', '--run', default=False, type=bool,
+                        help='Whether to do validation')
     parser.add_argument('-l', '--cl', default=None, type=int,
                         help='A specific class to train on, overriting config')
     args = parser.parse_args()
@@ -520,8 +663,4 @@ if __name__ == '__main__':
 
     print(f"Running experiment for class {args.cl}...")
 
-    main(config, args.resume)
-    # main(config, args.resume)
-    # main(config, args.resume)
-    # main(config, args.resume)
-    # main(config, args.resume)
+    main(config, args.model, args.run)
