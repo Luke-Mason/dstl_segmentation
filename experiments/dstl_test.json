@@ -1,6 +1,6 @@
 {
     "name": "dstl_test",
-    "n_gpu": 1,
+    "n_gpu": 2,
     "use_synch_bn": false,
     "arch": {
         "type": "UFONet",
