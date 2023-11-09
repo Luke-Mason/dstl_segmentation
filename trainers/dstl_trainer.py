@@ -267,12 +267,15 @@ class DSTLTrainer(BaseTrainer):
                         # Assuming 'src_tensor' is your PyTorch tensor
                         # Convert PyTorch tensor to NumPy array
                         # Convert grayscale to BGR
+                        dta = dta.cpu().numpy().transpose((1,2,0))
                         self.logger.info(f"Data shape: {dta.shape}")
-                        dra_image = cv2.cvtColor(dta.cpu().numpy().transpose((1,2,0)),
-                                                 cv2.COLOR_GRAY2BGR)
+                        self.logger.info(
+                            f"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+
+                        dra_image = cv2.cvtColor(dta, cv2.COLOR_GRAY2BGR)
 
                         # Perform the operations on each channel
-                        for c in range(3):
+                        for c in range(dta.shape[2]):
                             min_val, max_val = np.percentile(dra_image[:, :, c],
                                                              [0.1, 99.9])
                             dra_image[:, :, c] = 255 * (
