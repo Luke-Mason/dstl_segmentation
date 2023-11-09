@@ -14,9 +14,9 @@ metric_indx = dict({
     "4": "Trees",
     "5": "Crops",
     "6": "Waterway",
-    "7": "Standing water",
-    "8": "Vehicle Large",
-    "9": "Vehicle Small",
+    "7": "Standing_water",
+    "8": "Vehicle_Large",
+    "9": "Vehicle_Small",
     "10": "Negative"
 })
 
