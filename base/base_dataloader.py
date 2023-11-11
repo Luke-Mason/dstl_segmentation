@@ -10,6 +10,7 @@ class BaseDataLoader(DataLoader):
             sampler = WeightedRandomSampler(weights, batch_size * math.ceil(self.nbr_examples / batch_size), True)
         else:
             sampler = SequentialSampler(dataset)
+            shuffle = False
 
         self.init_kwargs = {
             'dataset': dataset,

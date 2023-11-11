@@ -30,7 +30,6 @@ import re
 from PIL import Image
 import numpy as np
 import cv2
-import matplotlib.pyplot as plt
 import tifffile as tiff
 from visualise_run_stats import ids
 
@@ -43,6 +42,8 @@ str, class_ids, experiment_id):
     # Dynamic range adjustment for the file
     # Thank you u1234x1234 for this dra code
     dra_image = cv2.cvtColor(src_image.transpose((1,2,0)), cv2.COLOR_RGB2BGR)
+    dra_image = cv2.cvtColor(dra_image, cv2.COLOR_BGR2RGB)
+
     for c in range(dra_image.shape[2]):
         min_val, max_val = np.percentile(dra_image[:, :, c], [0.1, 99.9])
         dra_image[:, :, c] = 255 * (dra_image[:, :, c] - min_val) / (max_val - min_val)
@@ -63,25 +64,38 @@ str, class_ids, experiment_id):
 
         # Get inverse of mask out because we want to apply a addition
         # operator to the masked pixels so they plug together like two puzzle
-        # pieces togther to make 1 image.
+        # pieces together to make 1 image.
         combined_mask_inv = np.invert(combined_mask.astype(np.bool_))
 
         # Get the mask pixels of the image with bitwise and operation
         rgb_mask_inv = np.bitwise_and(dra_image, combined_mask_inv * 255)
-        rgb_mask = np.bitwise_and(dra_image, combined_mask * 255)
-        rgb_mask = np.bitwise_or(rgb_mask, target_color)
+        # ac = np.zeros((rgb_mask_inv.shape[0], rgb_mask_inv.shape[1], 1),
+        #                          dtype=rgb_mask_inv.dtype)
+        # rgb_mask_inv = np.concatenate((rgb_mask_inv, ac), axis=2)
+        # rgb_mask_inv[:, :, 3] = 1
 
-        # Apply alpha to those cropped pixels
-        rgb_mask = cv2.addWeighted(rgb_mask, 0.5, mask_color, 0.5, 0)
-        # plt.imshow(rgb_mask)
-        # plt.show()
+        rgb_image = np.bitwise_and(dra_image, combined_mask * 255)
+        rgb_image = np.bitwise_or(rgb_image, target_color)
 
 
-        image = rgb_mask_inv + rgb_mask
+        # ac = np.zeros((rgb_image.shape[0], rgb_image.shape[1], 1),
+        #                          dtype=rgb_image.dtype)
+        # rgb_image = np.concatenate((rgb_image, ac), axis=2)
+        # rgb_image[:, :, 3] = 1
+
+        # ac = np.zeros((mask_color.shape[0], mask_color.shape[1], 1),
+        #               dtype=mask_color.dtype)
+        # mask_color = np.concatenate((mask_color, ac), axis=2)
+        # mask_color[:, :, 3] = 0.5
+
+        rgb_image = cv2.addWeighted(rgb_image, 0.5, mask_color, 0.5, 0)
+
+        image = rgb_mask_inv + rgb_image
         image = Image.fromarray(image.astype(np.uint8))
         object_idx = class_ids[0] + 1
-        image.save(f"tmp/{ids[int(experiment_id)]}-{object_idx}-"
-                       f"{class_index + 1}"
+        type = "P" if class_index + 1 != 11 else "N"
+        image.save(f"tmp/{ids[int(experiment_id) - 1]}-{object_idx}-"
+                       f"{type}"
                        f"_{output_path}")
 #%%
 
@@ -449,7 +463,7 @@ def main(config, model_pth, run_model: bool):
                                             train_indices=train_indxs,
                                             val_indices=val_indxs)
 
-            train_patch_files, val_patch_files = preprocessor.get_files()
+            train_patch_files, val_files = preprocessor.get_files()
 
             logger.info("Creating file weights..")
             train_patch_weights, val_patch_weights = preprocessor.get_file_weights()
@@ -478,7 +492,7 @@ def main(config, model_pth, run_model: bool):
             )
             val_loader = DSTLLoader(
                 **all_loader_config,
-                files=val_patch_files,
+                files=val_files,
                 weights=val_patch_weights,
                 **config["val_loader"]["args"]
             )
@@ -556,10 +570,10 @@ def main(config, model_pth, run_model: bool):
                                         train_indices=[],
                                         val_indices=sorted_by_area)
 
-        __, val_patch_files = preprocessor.get_files()
+        __, val_files = preprocessor.get_files()
 
 
-        config['all_loader']['args']['batch_size'] = len(val_patch_files)
+        config['all_loader']['args']['batch_size'] = len(val_files)
 
         # Create train and valiation data loaders that only load the data
         # into batch by seleecting indexes from the list of indices we
@@ -573,7 +587,7 @@ def main(config, model_pth, run_model: bool):
 
         data_loader = DSTLLoader(
             **all_loader_config,
-            files=val_patch_files,
+            files=val_files,
             run_model=True,
             **config["val_loader"]["args"]
         )
@@ -601,23 +615,12 @@ def main(config, model_pth, run_model: bool):
             num_classes=num_classes,
             add_negative_class=add_negative_class,
         )
-        patch_size = config['all_loader']['preprocessing']['patch_size']
-        overlap_pixels = config['all_loader']['preprocessing']['overlap_pixels']
-        step_size = patch_size - overlap_pixels
-        C, H, W = preprocessor.get_image_dims(0)
-        offsets = preprocessor._gen_chunk_offsets(W, H, step_size)
 
         outputs, targets = trainer.train()
 
         idx, image_id, __ = _wkt_data[0]
         tc = training_classes_ + [10] if add_negative_class else (
             training_classes_)
-        image_path = (dstl_data_path + "/sixteen_band/sixteen_band/" +
-                      image_id + "_P.tif")
-
-        # Load the RGB image
-        image = tiff.imread(image_path)
-        image = np.expand_dims(image, axis=2)
 
         # file name stuff
         pattern = r'saved/models/ex(.+)-.+/'
@@ -632,14 +635,29 @@ def main(config, model_pth, run_model: bool):
         else:
             raise ValueError(f'No match found for {pattern} in {model_pth}')
 
+        patches = {
+            0: 54,
+            1: 33,
+            2: 154,
+            3: 175,
+            4: 234,
+            5: 122,
+            6: 121,
+            7: 133,
+            8: 70,
+            9: 109,
+        }
 
-        for offset, image_patch, output_mask, target_mask in zip(offsets,val_patch_files, outputs, targets):
-            x, y = offset
+        idx_allowed = patches[tc[0]]
+        for idx, (image_patch, output_mask, target_mask) in (
+                enumerate(zip(val_files, outputs, targets))):
+            if idx_allowed != idx:
+                continue
+
             output_mask = output_mask.cpu().numpy().transpose(1, 2, 0)
             target_mask = target_mask.cpu().numpy().transpose(1, 2, 0)
             overlay_masks_on_image(image_patch[0], target_mask, output_mask,
-                                   str(f"{x}_{y}.png"), tc, experiment_id)
-
+                                   str(f".png"), tc, experiment_id)
 
 if __name__ == '__main__':
     # PARSE THE ARGS

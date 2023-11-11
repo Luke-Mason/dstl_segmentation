@@ -539,7 +539,8 @@ class DSTLPreprocessor:
         else:
             raise ValueError(f'Invalid reference file type: {self.reference_file_type}')
 
-        w, h = ref_img.shape[1:]
+        # Change back to ref_img
+        w, h = im_rgb.shape[1:]
 
         # Resize the images to be the same size as ref.
         # Sometimes panchromatic is a couple of pixels different to RGB
