@@ -13,5 +13,5 @@ number=$1
 for i in {0..9}; do
     config="experiments/dstl_ex${number}.json"
     echo "Calling srun --mem=50G --cpus-per-task=8 --gres=gpu:1 python3 dstl_train.py --config $config --cl $i -r true -m saved/models/ex$number/$i/best_model.pth"
-    python3 dstl_train.py --config "$config" --cl "$i" -r true -m "saved/models/ex$number/$i/best_model.pth"
+    srun --mem=50G --cpus-per-task=8 --gres=gpu:1 python3 dstl_train.py --config "$config" --cl "$i" -r true -m "saved/models/ex$number/$i/best_model.pth"
 done
