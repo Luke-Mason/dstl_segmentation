@@ -15,22 +15,22 @@
             "training_band_groups": [
                 {
                     "bands": [
-                        10
-                    ]
-                },
-                {
-                    "bands": [
-                        11
-                    ]
-                },
-                {
-                    "bands": [
                         12
+                    ]
+                },
+                {
+                    "bands": [
+                        13
+                    ]
+                },
+                {
+                    "bands": [
+                        14
                     ]
                 }
             ],
             "training_classes": [
-                9
+                4
             ]
         }
     },
@@ -53,7 +53,7 @@
         "type": "StepLR"
     },
     "n_gpu": 1,
-    "name": "dstl_ex10-1",
+    "name": "dstl_ex12-1",
     "optimizer": {
         "args": {
             "lr": 0.1,
