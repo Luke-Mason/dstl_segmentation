@@ -74,7 +74,7 @@
         "log_per_iter": 10,
         "monitor": "max Mean_IoU",
         "save_dir": "saved/",
-        "save_period": 20,
+        "save_period": 5,
         "tensorboard": true,
         "val": true,
         "val_per_epochs": 5

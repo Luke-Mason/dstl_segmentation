@@ -269,10 +269,9 @@ class DSTLTrainer(BaseTrainer):
                         # Convert grayscale to BGR
                         dta = dta.cpu().numpy().transpose((1,2,0))
                         self.logger.info(f"Data shape: {dta.shape}")
-                        self.logger.info(
-                            f"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-
+                        self.logger.info(f"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
                         dra_image = cv2.cvtColor(dta, cv2.COLOR_RGB2BGR)
+                        dra_image = cv2.cvtColor(dra_image, cv2.COLOR_BGR2RGB)
 
                         # Perform the operations on each channel
                         for c in range(dta.shape[2]):

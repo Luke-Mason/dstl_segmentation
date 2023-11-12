@@ -13,7 +13,7 @@
     "trainer": {
         "epochs": 100,
         "save_dir": "saved/",
-        "save_period": 20,
+        "save_period": 5,
         "monitor": "max Mean_IoU",
         "early_stop": 3,
         "tensorboard": true,

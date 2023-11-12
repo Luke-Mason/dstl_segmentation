@@ -11,10 +11,10 @@ from utils.ptflops import get_model_complexity_info
 pt_models = {
     'UFONet': UFONet,
     'ENet': ENet
-    }
+}
 
 if __name__ == '__main__':
-    resolution = 128
+    resolution = 256
     parser = argparse.ArgumentParser(description='ptflops sample script')
     parser.add_argument('--device', type=int, default=0,
                         help='Device to store the model.')
