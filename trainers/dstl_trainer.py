@@ -83,6 +83,14 @@ class DSTLTrainer(BaseTrainer):
                 outputs.append(output)
                 targets.append(target)
 
+        elapsed_time = time.time() - t_start
+        speed_time = elapsed_time / iteration * 1000
+        fps = iteration / elapsed_time
+
+
+        print('Elapsed Time: [%.2f s / %d iter]' % (elapsed_time, iteration))
+        print('Speed Time: %.2f ms / iter   FPS: %.2f' % (speed_time, fps))
+
         return torch.cat(outputs), torch.cat(targets)
 
     def _train_epoch(self, epoch):

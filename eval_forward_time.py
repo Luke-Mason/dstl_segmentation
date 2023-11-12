@@ -11,6 +11,7 @@ from Flops_test import _get_available_devices, get_instance
 
 def compute_speed(model, input_size, device, iteration=1000):
     cudnn.benchmark = True
+    model = model.cuda()
     model.eval()
 
     input = torch.randn(*input_size, device=device)
@@ -19,11 +20,11 @@ def compute_speed(model, input_size, device, iteration=1000):
         model(input)
 
     print('=========Eval Forward Time=========')
-    torch.cuda.synchronize()
+    # torch.cuda.synchronize()
     t_start = time.time()
     for _ in range(iteration):
         model(input)
-    torch.cuda.synchronize()
+    # torch.cuda.synchronize()
     elapsed_time = time.time() - t_start
 
     speed_time = elapsed_time / iteration * 1000
@@ -54,7 +55,6 @@ if __name__ == '__main__':
     parser.add_argument('--batch-size', type=int, default=1)
     parser.add_argument('--classes', type=int, default=2)
     parser.add_argument('--iter', type=int, default=1000)
-    #parser.add_argument('--model', type=str, default='UFONet')
     parser.add_argument("-g", "--gpus", default=0, type=int, help="gpu ids "
                                                                     "(default: 0)")
     parser.add_argument('-c', '--config', default='config.json',type=str,
