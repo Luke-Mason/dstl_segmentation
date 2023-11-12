@@ -25,7 +25,7 @@ window = 10  # Adjust the window size for smoothing
 
 
 def visualise_run_stats(id, run_path: str, run_desc: str, dir: str):
-    metric = "F1_Score"
+    metric = "Pixel_Accuracy"
     df = pd.read_csv(f"{run_path}.tsv", sep='\t')
     df = df.rename(columns={"step": "Epochs"})
     df = df.set_index("Epochs")
@@ -145,7 +145,7 @@ def collect_and_visualise(runs, dir):
 
 
 if __name__ == '__main__':
-    dir = "ex_set_1_f1"
+    dir = "ex_set_1_pa"
     if not os.path.exists(dir):
         os.makedirs(dir)
     runs = {
