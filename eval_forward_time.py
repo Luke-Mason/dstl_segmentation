@@ -11,7 +11,6 @@ from Flops_test import _get_available_devices, get_instance
 
 def compute_speed(model, input_size, device, iteration=1000):
     cudnn.benchmark = True
-    model = model.cuda()
     model.eval()
 
     input = torch.randn(*input_size, device=device)
@@ -20,11 +19,11 @@ def compute_speed(model, input_size, device, iteration=1000):
         model(input)
 
     print('=========Eval Forward Time=========')
-    # torch.cuda.synchronize()
+    torch.cuda.synchronize()
     t_start = time.time()
     for _ in range(iteration):
         model(input)
-    # torch.cuda.synchronize()
+    torch.cuda.synchronize()
     elapsed_time = time.time() - t_start
 
     speed_time = elapsed_time / iteration * 1000
