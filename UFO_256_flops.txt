@@ -1,0 +1,2 @@
+Resolution,Flops,Params
+256,1.01502 GMac,385.858 k
