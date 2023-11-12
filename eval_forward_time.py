@@ -6,15 +6,12 @@ import models
 import json
 import os
 from argparse import ArgumentParser
-
+from Flops_test import _get_available_devices, get_instance
 
 
 def compute_speed(model, input_size, device, iteration=1000):
-    torch.cuda.set_device(device)
     cudnn.benchmark = True
-
     model.eval()
-    model = model.cuda()
 
     input = torch.randn(*input_size, device=device)
 
@@ -58,7 +55,7 @@ if __name__ == '__main__':
     parser.add_argument('--classes', type=int, default=2)
     parser.add_argument('--iter', type=int, default=1000)
     #parser.add_argument('--model', type=str, default='UFONet')
-    parser.add_argument("-g", "--gpus", type=str, default="0", help="gpu ids "
+    parser.add_argument("-g", "--gpus", default=0, type=int, help="gpu ids "
                                                                     "(default: 0)")
     parser.add_argument('-c', '--config', default='config.json',type=str,
                         help='Path to the config file (default: config.json)')
@@ -67,5 +64,9 @@ if __name__ == '__main__':
     config = json.load(open(args.config))
     h, w = map(int, args.size.split(','))
 
-    model = getattr(models, config['arch']['type'])(2, **config['arch']['args'])
-    compute_speed(model, (args.batch_size, args.num_channels, h, w), int(args.gpus), iteration=args.iter)
+    device, available_gpus = _get_available_devices(args.gpus)
+    model = get_instance(models, 'arch', config, 2)
+    model = torch.nn.DataParallel(model, device_ids=available_gpus)
+    model.to(device)
+
+    compute_speed(model, (args.batch_size, args.num_channels, h, w), device, iteration=args.iter)
