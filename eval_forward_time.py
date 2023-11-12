@@ -58,14 +58,14 @@ if __name__ == '__main__':
     parser.add_argument('--classes', type=int, default=2)
     parser.add_argument('--iter', type=int, default=1000)
     #parser.add_argument('--model', type=str, default='UFONet')
-    parser.add_argument("--gpus", type=str, default="0", help="gpu ids (default: 0)")
+    parser.add_argument("-g", "--gpus", type=str, default="0", help="gpu ids "
+                                                                    "(default: 0)")
     parser.add_argument('-c', '--config', default='config.json',type=str,
                         help='Path to the config file (default: config.json)')
     args = parser.parse_args()
 
     config = json.load(open(args.config))
     h, w = map(int, args.size.split(','))
-    loader = getattr(dataloaders, config['train_loader']['type'])(**config['train_loader']['args'])
-    num_classes = loader.dataset.num_classes
-    model = getattr(models, config['arch']['type'])(num_classes, **config['arch']['args'])
+
+    model = getattr(models, config['arch']['type'])(2, **config['arch']['args'])
     compute_speed(model, (args.batch_size, args.num_channels, h, w), int(args.gpus), iteration=args.iter)
