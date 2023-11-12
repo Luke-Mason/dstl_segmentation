@@ -66,7 +66,7 @@ if __name__ == '__main__':
 
     device, available_gpus = _get_available_devices(args.gpus)
     model = get_instance(models, 'arch', config, 2)
-    # model = torch.nn.DataParallel(model, device_ids=available_gpus)
+    model = torch.nn.DataParallel(model, device_ids=available_gpus)
     model.to(device)
 
     compute_speed(model, (args.batch_size, args.num_channels, h, w), device, iteration=args.iter)
