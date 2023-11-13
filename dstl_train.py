@@ -571,7 +571,7 @@ def main(config, model_pth, run_model: bool):
                                         val_indices=sorted_by_area)
 
         __, val_files = preprocessor.get_files()
-
+        print(f"FILE LEN: {len(val_files)}")
 
         config['all_loader']['args']['batch_size'] = len(val_files)
 

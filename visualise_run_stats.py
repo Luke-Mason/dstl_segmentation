@@ -145,7 +145,7 @@ def collect_and_visualise(runs, dir):
 
 
 if __name__ == '__main__':
-    dir = "ex_set_1_pa"
+    dir = "ex_set_2_pa"
     if not os.path.exists(dir):
         os.makedirs(dir)
     runs = {
@@ -163,7 +163,7 @@ if __name__ == '__main__':
         "12-1": "Bands 12-14"
     }
 
-    # dir = "ex_set_1_f1"
+    # dir = "ex_set_2_f1"
     # if not os.path.exists(dir):
     #     os.makedirs(dir)
     # runs = {
