@@ -60,7 +60,7 @@ if __name__ == '__main__':
     print('Flops: ' + str(flops))
     print('Params: ' + str(params))
 
-    logFileLoc = 'UFO_256_flops.txt'
+    logFileLoc = 'UFO_256_flops_M.txt'
 
     if os.path.isfile(logFileLoc):
         logger = open(logFileLoc, 'a')

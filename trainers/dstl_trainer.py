@@ -73,6 +73,7 @@ class DSTLTrainer(BaseTrainer):
 
         outputs = []
         targets = []
+        t_start = time.time()
         with torch.no_grad():
             start_idx = 0
             for batch_idx, (data, target) in enumerate(tbar):
