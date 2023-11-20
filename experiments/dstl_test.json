@@ -76,6 +76,7 @@
     },
     "loss": "JaccardCoefficient",
     "threshold": 0.5,
+    "channel_weights": [1, 1],
     "ignore_index": 10,
     "lr_scheduler": {
         "type": "StepLR",

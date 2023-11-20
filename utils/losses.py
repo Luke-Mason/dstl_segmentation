@@ -109,16 +109,29 @@ class LovaszSoftmax(nn.Module):
 
 
 class JaccardCoefficient(nn.Module):
-    def __init__(self, threshold=0.5):
+    def __init__(self, weights, threshold=0.5):
+        self.weights = torch.tensor(weights).float()
+        self.channel_dim = 1
         self.threshold = threshold
         super(JaccardCoefficient, self).__init__()
 
     def forward(self, output, target):
+
+
         # Calculate the intersection by element-wise multiplication and sum
-        intersection = (target * output).sum()
+        intersection_matrix = torch.matmul(target, output)
+
+        scaled_intersection = torch.matmul(intersection_matrix.sum(dim=self.channel_dim).float(), self.weights, dim=self.channel_dim)
+        scaled_targets = torch.matmul(tarrget.sum(dim=self.channel_dim).float(), self.weights, dim=self.channel_dim)
+        scaled_output = torch.matmul(output.sum(dim=self.channel_dim).float(), self.weights, dim=self.channel_dim)
+
+        intersection = scaled_intersection.sum()
 
         # Calculate the union by summing the individual sums of target and output
-        union = target.sum() + output.sum() - intersection
+        union = scaled_target.sum() + scaled_output.sum() - intersection
+        
+        intersection = intersection.float()
+        union = union.float()
 
         # Calculate the Jaccard coefficient (IoU)
         jaccard = (intersection + 1.0) / ((union + 1.0) + epsilon)

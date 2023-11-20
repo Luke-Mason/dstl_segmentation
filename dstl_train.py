@@ -398,7 +398,7 @@ def main(config, model_pth, run_model: bool):
         stratisfied_indices = arr.flatten()
 
     # LOSS
-    loss = getattr(losses, config['loss'])(threshold=config['threshold'])
+    loss = getattr(losses, config['loss'])(weights=config['channel_weights'], threshold=config['threshold'])
     start_time = datetime.datetime.now().strftime('%m-%d_%H-%M')
 
     if config["trainer"]["val"] and not run_model:
